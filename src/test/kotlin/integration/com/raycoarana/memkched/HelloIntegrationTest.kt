@@ -1,5 +1,6 @@
 package com.raycoarana.memkched
 
+import com.raycoarana.memkched.HelloIntegrationTest.TextStorageCommands.set
 import com.raycoarana.memkched.api.CasUnique
 import com.raycoarana.memkched.api.Expiration
 import com.raycoarana.memkched.api.Flags
@@ -25,7 +26,7 @@ class HelloIntegrationTest {
 
     private val EOL = "\r\n"
 
-    interface TextStorageCommands {
+    object TextStorageCommands {
         /***
          * <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
          *
@@ -36,7 +37,7 @@ class HelloIntegrationTest {
          * @param replay optional parameter to instruct the server to not send an answer
          */
         fun set(key: String, flags: Flags, expiration: Expiration, dataSize: Int, replay: Reply = Reply.DEFAULT): ByteArray =
-            "set $key ${flags.toUShort()} ${expiration.value} $dataSize$replay$EOL".toByteArray(Charsets.US_ASCII)
+            "set $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL".toByteArray(Charsets.US_ASCII)
 
         /***
          * <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
@@ -48,7 +49,7 @@ class HelloIntegrationTest {
          * @param replay optional parameter to instruct the server to not send an answer
          */
         fun add(key: String, flags: Flags, expiration: Expiration, dataSize: Int, replay: Reply = Reply.DEFAULT): ByteArray =
-            "add $key ${flags.toUShort()} ${expiration.value} $dataSize$replay$EOL".toByteArray(Charsets.US_ASCII)
+            "add $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL".toByteArray(Charsets.US_ASCII)
 
         /***
          * <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
@@ -60,7 +61,7 @@ class HelloIntegrationTest {
          * @param replay optional parameter to instruct the server to not send an answer
          */
         fun replace(key: String, flags: Flags, expiration: Expiration, dataSize: Int, replay: Reply = Reply.DEFAULT): ByteArray =
-            "replace $key ${flags.toUShort()} ${expiration.value} $dataSize$replay$EOL".toByteArray(Charsets.US_ASCII)
+            "replace $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL".toByteArray(Charsets.US_ASCII)
 
         /***
          * <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
@@ -72,7 +73,7 @@ class HelloIntegrationTest {
          * @param replay optional parameter to instruct the server to not send an answer
          */
         fun append(key: String, flags: Flags, expiration: Expiration, dataSize: Int, replay: Reply = Reply.DEFAULT): ByteArray =
-            "append $key ${flags.toUShort()} ${expiration.value} $dataSize$replay$EOL".toByteArray(Charsets.US_ASCII)
+            "append $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL".toByteArray(Charsets.US_ASCII)
 
         /***
          * <command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
@@ -84,7 +85,7 @@ class HelloIntegrationTest {
          * @param replay optional parameter to instruct the server to not send an answer
          */
         fun prepend(key: String, flags: Flags, expiration: Expiration, dataSize: Int, replay: Reply = Reply.DEFAULT): ByteArray =
-            "append $key ${flags.toUShort()} ${expiration.value} $dataSize$replay$EOL".toByteArray(Charsets.US_ASCII)
+            "append $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL".toByteArray(Charsets.US_ASCII)
 
         /***
          * cas <key> <flags> <exptime> <bytes> <cas unique> [noreply]\r\n
@@ -97,7 +98,7 @@ class HelloIntegrationTest {
          * @param replay optional parameter to instruct the server to not send an answer
          */
         fun cas(key: String, flags: Flags, expiration: Expiration, dataSize: Int, casUnique: CasUnique, replay: Reply = Reply.DEFAULT): ByteArray =
-            "cas $key ${flags.toUShort()} ${expiration.value} $dataSize $casUnique$replay$EOL".toByteArray(Charsets.US_ASCII)
+            "cas $key ${flags.toUShort()} ${expiration.value} $dataSize $casUnique${replay.asTextCommandValue()}$EOL".toByteArray(Charsets.US_ASCII)
     }
 
     @Test
@@ -119,7 +120,8 @@ class HelloIntegrationTest {
         val future = channel.connect(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
         future.get()
         val buffer = ByteBuffer.allocate(4096)
-        buffer.put("set HELLO 0 0 5\r\nMOLA!\r\n".toByteArray(Charsets.US_ASCII)).flip()
+        buffer.put(set("HELLO", Flags(), Expiration.Relative(100), 5))
+        buffer.put("MOLA!\r\n".toByteArray(Charsets.US_ASCII)).flip()
         var writtenBytes = channel.write(buffer).get()
         println("bytes send => $writtenBytes")
         val getCmd = "get HELLO\r\n".toByteArray(Charsets.US_ASCII)
