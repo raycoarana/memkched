@@ -14,8 +14,9 @@ sealed class Expiration(val value: Long) {
      * Associate a relative to now expiration time to the key/value registry
      * It can't exceed 30 days in seconds
      */
-    class Relative(value: Int): Expiration(value.toLong()) {
+    class Relative(value: Int) : Expiration(value.toLong()) {
         constructor(value: Duration) : this(value.toSeconds().toInt())
+
         init {
             require(value <= MAX_RELATIVE_EXPIRATION) { "Relative expire date can't exceed 30 days in seconds" }
         }
@@ -25,7 +26,7 @@ sealed class Expiration(val value: Long) {
      * Associate an absolute expiration time to the key/value registry
      * The value can't be in the past from now
      */
-    class Absolute(value: Instant): Expiration(value.epochSecond) {
+    class Absolute(value: Instant) : Expiration(value.epochSecond) {
         init {
             require(value.isBefore(Instant.now())) { "Absolute expire date can't be in the past" }
         }

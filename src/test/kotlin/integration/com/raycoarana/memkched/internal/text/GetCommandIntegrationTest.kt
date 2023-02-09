@@ -1,6 +1,5 @@
-package com.raycoarana.memkched.internal
+package com.raycoarana.memkched.internal.text
 
-import com.raycoarana.memkched.internal.text.get
 import com.raycoarana.memkched.test.Containers
 import com.raycoarana.memkched.test.MemcachedAssertions
 import org.junit.jupiter.api.Test

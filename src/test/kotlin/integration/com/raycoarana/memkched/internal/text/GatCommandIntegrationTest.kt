@@ -1,7 +1,6 @@
-package com.raycoarana.memkched.internal
+package com.raycoarana.memkched.internal.text
 
 import com.raycoarana.memkched.api.Expiration.Relative
-import com.raycoarana.memkched.internal.text.gat
 import com.raycoarana.memkched.test.Containers
 import com.raycoarana.memkched.test.MemcachedAssertions
 import org.junit.jupiter.api.Test

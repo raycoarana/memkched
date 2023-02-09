@@ -4,7 +4,6 @@ import com.raycoarana.memkched.api.CasUnique
 import com.raycoarana.memkched.api.Expiration
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
-import java.nio.ByteBuffer
 
 /***
  * get <key>*\r\n
@@ -83,7 +82,13 @@ internal fun gats(keys: List<String>, expiration: Expiration): String =
  * @param dataSize number of bytes of data to set
  * @param replay optional parameter to instruct the server to not send an answer
  */
-internal fun set(key: String, flags: Flags, expiration: Expiration, dataSize: Int, replay: Reply = Reply.DEFAULT): String =
+internal fun set(
+    key: String,
+    flags: Flags,
+    expiration: Expiration,
+    dataSize: Int,
+    replay: Reply = Reply.DEFAULT
+): String =
     "set $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL"
 
 /***
@@ -95,7 +100,13 @@ internal fun set(key: String, flags: Flags, expiration: Expiration, dataSize: In
  * @param dataSize number of bytes of data to set
  * @param replay optional parameter to instruct the server to not send an answer
  */
-internal fun add(key: String, flags: Flags, expiration: Expiration, dataSize: Int, replay: Reply = Reply.DEFAULT): String =
+internal fun add(
+    key: String,
+    flags: Flags,
+    expiration: Expiration,
+    dataSize: Int,
+    replay: Reply = Reply.DEFAULT
+): String =
     "add $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL"
 
 /***
@@ -107,7 +118,13 @@ internal fun add(key: String, flags: Flags, expiration: Expiration, dataSize: In
  * @param dataSize number of bytes of data to set
  * @param replay optional parameter to instruct the server to not send an answer
  */
-internal fun replace(key: String, flags: Flags, expiration: Expiration, dataSize: Int, replay: Reply = Reply.DEFAULT): String =
+internal fun replace(
+    key: String,
+    flags: Flags,
+    expiration: Expiration,
+    dataSize: Int,
+    replay: Reply = Reply.DEFAULT
+): String =
     "replace $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL"
 
 /***
@@ -119,7 +136,13 @@ internal fun replace(key: String, flags: Flags, expiration: Expiration, dataSize
  * @param dataSize number of bytes of data to set
  * @param replay optional parameter to instruct the server to not send an answer
  */
-internal fun append(key: String, flags: Flags, expiration: Expiration, dataSize: Int, replay: Reply = Reply.DEFAULT): String =
+internal fun append(
+    key: String,
+    flags: Flags,
+    expiration: Expiration,
+    dataSize: Int,
+    replay: Reply = Reply.DEFAULT
+): String =
     "append $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL"
 
 /***
@@ -131,7 +154,13 @@ internal fun append(key: String, flags: Flags, expiration: Expiration, dataSize:
  * @param dataSize number of bytes of data to set
  * @param replay optional parameter to instruct the server to not send an answer
  */
-internal fun prepend(key: String, flags: Flags, expiration: Expiration, dataSize: Int, replay: Reply = Reply.DEFAULT): String =
+internal fun prepend(
+    key: String,
+    flags: Flags,
+    expiration: Expiration,
+    dataSize: Int,
+    replay: Reply = Reply.DEFAULT
+): String =
     "prepend $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL"
 
 /***
@@ -144,7 +173,14 @@ internal fun prepend(key: String, flags: Flags, expiration: Expiration, dataSize
  * @param casUnique unique 64-bits value of the existing item
  * @param replay optional parameter to instruct the server to not send an answer
  */
-internal fun cas(key: String, flags: Flags, expiration: Expiration, dataSize: Int, casUnique: CasUnique, replay: Reply = Reply.DEFAULT): String =
+internal fun cas(
+    key: String,
+    flags: Flags,
+    expiration: Expiration,
+    dataSize: Int,
+    casUnique: CasUnique,
+    replay: Reply = Reply.DEFAULT
+): String =
     "cas $key ${flags.toUShort()} ${expiration.value} $dataSize ${casUnique.value}${replay.asTextCommandValue()}$EOL"
 
 /***
@@ -187,12 +223,9 @@ internal fun delete(key: String, replay: Reply = Reply.DEFAULT): String =
     "delete $key${replay.asTextCommandValue()}$EOL"
 
 /***
- * delete <key> [noreply]\r\n
+ * flush_all <key> [noreply]\r\n
  *
- * @param key a maximum of 250 characters key, must not include control characters or whitespaces
  * @param replay optional parameter to instruct the server to not send an answer
  */
-internal fun ByteBuffer.writeDataLine(data: ByteArray) = apply {
-    put(data).put(EOL_BYTE_ARRAY)
-}
-
+internal fun flushAll(replay: Reply = Reply.DEFAULT): String =
+    "flush_all${replay.asTextCommandValue()}$EOL"

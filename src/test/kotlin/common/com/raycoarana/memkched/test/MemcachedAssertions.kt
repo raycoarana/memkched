@@ -1,6 +1,7 @@
 package com.raycoarana.memkched.test
 
 import com.raycoarana.memkched.internal.text.EOL_BYTE_ARRAY
+import com.raycoarana.memkched.internal.text.flushAll
 import com.raycoarana.memkched.test.Containers.MEMCACHED_PORT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.testcontainers.containers.GenericContainer
@@ -11,13 +12,23 @@ import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousSocketChannel
 import java.util.concurrent.TimeUnit
 
-class MemcachedAssertions(private val container: GenericContainer<*>) {
+class MemcachedAssertions(private val container: GenericContainer<*>) : Closeable {
+    private val channel = AsynchronousSocketChannel.open()
+    private var connected: Boolean = false
+
+    private fun init() {
+        if (!connected) {
+            channel.connect(InetSocketAddress(container.host, container.getMappedPort(MEMCACHED_PORT))).get()
+            connected = true
+        }
+    }
+
     fun assertThatAfterSending(command: String): TextReceivedMatcher =
         assertThatAfterSending(command.toByteArray(Charsets.US_ASCII))
 
     fun assertThatAfterSending(data: ByteArray): TextReceivedMatcher {
-        val channel = AsynchronousSocketChannel.open()
-        channel.connect(InetSocketAddress(container.host, container.getMappedPort(MEMCACHED_PORT))).get()
+        init()
+
         return TextReceivedMatcher(channel, data)
     }
 
@@ -30,15 +41,18 @@ class MemcachedAssertions(private val container: GenericContainer<*>) {
         return assertThatAfterSending(finalData.array())
     }
 
+    fun flush() {
+        assertThatAfterSending(flushAll()).expectLine("OK")
+    }
+
     class TextReceivedMatcher(
         channel: AsynchronousSocketChannel,
         private val data: ByteArray
-    ): BaseReceivedMatcher(channel, data) {
+    ) : BaseReceivedMatcher(channel, data) {
 
-
-        fun expectErrorLine(): TextReceivedMatcher = apply {  }
-        fun expectClientErrorLine(): TextReceivedMatcher = apply {  }
-        fun expectServerErrorLine(): TextReceivedMatcher = apply {  }
+        fun expectErrorLine() = expectLine("ERROR")
+        fun expectClientErrorLine() = expectLine("CLIENT_ERROR")
+        fun expectServerErrorLine() = expectLine("SERVER_ERROR")
         fun expectEndLine() = expectLine("END")
         fun expectStoredLine() = expectLine("STORED")
         fun expectNotStoredLine() = expectLine("NOT_STORED")
@@ -52,6 +66,7 @@ class MemcachedAssertions(private val container: GenericContainer<*>) {
             actual = buffer.get().toInt().toChar()
             assertEquals('\n', actual, "Unexpected EOL char '\n'!=$actual")
         }
+
         fun expectNoMoreData() {
             assertEquals(buffer.position(), buffer.limit()) {
                 val data = ByteArray(buffer.limit() - buffer.position())
@@ -63,7 +78,7 @@ class MemcachedAssertions(private val container: GenericContainer<*>) {
             }
         }
 
-        private fun expectLine(line: String) = apply {
+        fun expectLine(line: String) = apply {
             if (buffer.position() == buffer.limit()) {
                 buffer.clear()
                 channel.read(buffer).get(1, TimeUnit.SECONDS)
@@ -81,19 +96,20 @@ class MemcachedAssertions(private val container: GenericContainer<*>) {
         }
     }
 
+    override fun close() {
+        channel.close()
+        connected = false
+    }
+
     abstract class BaseReceivedMatcher(
         protected val channel: AsynchronousSocketChannel,
         dataToSend: ByteArray
-    ): Closeable {
+    ) {
         protected val buffer: ByteBuffer = ByteBuffer.allocate(4096)
 
         init {
             buffer.put(dataToSend).flip()
             channel.write(buffer).get()
-        }
-
-        override fun close() {
-            channel.close()
         }
     }
 }
