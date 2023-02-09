@@ -1,6 +1,7 @@
 package com.raycoarana.memkched.internal.text
 
 internal const val EOL = "\r\n"
+internal val EOL_BYTE_ARRAY = EOL.toByteArray(Charsets.US_ASCII)
 internal const val ERROR = "ERROR"
 internal const val CLIENT_ERROR = "CLIENT_ERROR"
 internal const val SERVER_ERROR = "SERVER_ERROR"

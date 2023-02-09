@@ -1,4 +1,4 @@
-package com.raycoarana.memkched.test
+package com.raycoarana.memkched.test.converter
 
 import org.junit.jupiter.params.converter.ArgumentConversionException
 

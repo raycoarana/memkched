@@ -5,6 +5,7 @@ import com.raycoarana.memkched.api.Expiration
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.internal.text.EOL
 import com.raycoarana.memkched.internal.text.*
+import com.raycoarana.memkched.test.Containers
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
@@ -20,8 +21,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 class HelloIntegrationTest {
 
     @Container
-    private val memcached = GenericContainer(DockerImageName.parse("memcached:1.6.18-alpine"))
-        .withExposedPorts(11211)
+    private val memcached = Containers.MEMCACHED
 
     @Test
     fun testConvertToUShort() {

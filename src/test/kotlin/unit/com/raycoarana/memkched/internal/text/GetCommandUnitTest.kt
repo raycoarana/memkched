@@ -1,6 +1,6 @@
 package com.raycoarana.memkched.internal.text
 
-import com.raycoarana.memkched.test.StringListConverter
+import com.raycoarana.memkched.test.converter.StringListConverter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.converter.ConvertWith

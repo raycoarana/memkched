@@ -4,6 +4,7 @@ import com.raycoarana.memkched.api.CasUnique
 import com.raycoarana.memkched.api.Expiration
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
+import java.nio.ByteBuffer
 
 /***
  * get <key>*\r\n
@@ -184,3 +185,14 @@ internal fun decr(key: String, value: ULong, replay: Reply = Reply.DEFAULT): Str
  */
 internal fun delete(key: String, replay: Reply = Reply.DEFAULT): String =
     "delete $key${replay.asTextCommandValue()}$EOL"
+
+/***
+ * delete <key> [noreply]\r\n
+ *
+ * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+ * @param replay optional parameter to instruct the server to not send an answer
+ */
+internal fun ByteBuffer.writeDataLine(data: ByteArray) = apply {
+    put(data).put(EOL_BYTE_ARRAY)
+}
+
