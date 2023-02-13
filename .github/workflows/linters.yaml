@@ -1,0 +1,19 @@
+name: Linters
+on:
+  pull_request:
+
+jobs:
+  linters:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: GH Actions lint
+        uses: reviewdog/action-actionlint@v1
+      - name: Detekt
+        uses: alaegin/Detekt-Action@v1.22.0
+        with:
+          github_token: ${{ secrets.github_token }}
+          detekt_config: build-config/detekt/detekt.yml
+          detekt_baseline: build-config/detekt/baseline.xml
