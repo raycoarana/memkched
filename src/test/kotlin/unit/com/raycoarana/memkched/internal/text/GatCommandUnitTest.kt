@@ -13,7 +13,7 @@ class GatCommandUnitTest {
     @CsvSource(
         "empty key with relative exptime,'',1,'gat 1 \r\n'",
         "simple small key with relative exptime,a,1,'gat 1 a\r\n'",
-        "simple small key with absolute exptime,a,1675894272,'gat 1675894272 a\r\n'",
+        "simple small key with absolute exptime,a,5675894272,'gat 5675894272 a\r\n'",
     )
     fun `command gat with single key`(
         case: String,
@@ -30,8 +30,8 @@ class GatCommandUnitTest {
         "empty,'',1,'gat 1 \r\n'",
         "single small key with relative exptime,a,1,'gat 1 a\r\n'",
         "two small keys with relative exptime,'a,b',1,'gat 1 a b\r\n'",
-        "single small key with absolute exptime,a,1675894272,'gat 1675894272 a\r\n'",
-        "two small keys with absolute exptime,'a,b',1675894272,'gat 1675894272 a b\r\n'",
+        "single small key with absolute exptime,a,5675894272,'gat 5675894272 a\r\n'",
+        "two small keys with absolute exptime,'a,b',5675894272,'gat 5675894272 a b\r\n'",
     )
     fun `command gat with list of keys`(
         case: String,
@@ -47,7 +47,7 @@ class GatCommandUnitTest {
     @CsvSource(
         "empty key,'',1,'gats 1 \r\n'",
         "simple small key with relative exptime,a,1,'gats 1 a\r\n'",
-        "simple small key with absolute exptime,a,1675894272,'gats 1675894272 a\r\n'",
+        "simple small key with absolute exptime,a,5675894272,'gats 5675894272 a\r\n'",
     )
     fun `command gats with single key`(
         case: String,
@@ -64,8 +64,8 @@ class GatCommandUnitTest {
         "empty,'',1,'gats 1 \r\n'",
         "single small key with relative exptime,a,1,'gats 1 a\r\n'",
         "two small keys with relative exptime,'a,b',1,'gats 1 a b\r\n'",
-        "single small key with absolute exptime,a,1675894272,'gats 1675894272 a\r\n'",
-        "two small keys with absolute exptime,'a,b',1675894272,'gats 1675894272 a b\r\n'",
+        "single small key with absolute exptime,a,5675894272,'gats 5675894272 a\r\n'",
+        "two small keys with absolute exptime,'a,b',5675894272,'gats 5675894272 a b\r\n'",
     )
     fun `command gats with list of keys`(
         case: String,

@@ -28,7 +28,7 @@ sealed class Expiration(val value: Long) {
      */
     class Absolute(value: Instant) : Expiration(value.epochSecond) {
         init {
-            require(value.isBefore(Instant.now())) { "Absolute expire date can't be in the past" }
+            require(Instant.now().isBefore(value)) { "Absolute expire date can't be in the past" }
         }
     }
 
