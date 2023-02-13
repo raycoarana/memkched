@@ -50,6 +50,7 @@ class HelloIntegrationTest {
     private fun ByteBuffer.put(value: String) =
         put(value.toByteArray(Charsets.US_ASCII))
 
+    @Suppress("LongMethod")
     @Test
     fun `sample test`() {
         val channel = AsynchronousSocketChannel.open()

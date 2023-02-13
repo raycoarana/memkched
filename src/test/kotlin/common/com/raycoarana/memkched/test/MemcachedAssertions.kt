@@ -101,6 +101,7 @@ class MemcachedAssertions(private val container: GenericContainer<*>) : Closeabl
         connected = false
     }
 
+    @Suppress("UnnecessaryAbstractClass")
     abstract class BaseReceivedMatcher(
         protected val channel: AsynchronousSocketChannel,
         dataToSend: ByteArray

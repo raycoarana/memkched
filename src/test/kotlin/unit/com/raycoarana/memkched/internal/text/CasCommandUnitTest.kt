@@ -40,7 +40,16 @@ class CasCommandUnitTest {
         @JvmStatic
         private fun flagsProvider() = listOf(
             case("no key", "", Flags(), Relative(100), 1, CasUnique(3), Reply.DEFAULT, "cas  0 100 1 3$EOL"),
-            case("no flags", "some-key", Flags(), Relative(100), 1, CasUnique(3), Reply.DEFAULT, "cas some-key 0 100 1 3$EOL"),
+            case(
+                "no flags",
+                "some-key",
+                Flags(),
+                Relative(100),
+                1,
+                CasUnique(3),
+                Reply.DEFAULT,
+                "cas some-key 0 100 1 3$EOL"
+            ),
             case(
                 "some flags",
                 "some-key",
