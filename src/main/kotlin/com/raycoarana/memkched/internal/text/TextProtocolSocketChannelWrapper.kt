@@ -1,5 +1,6 @@
 package com.raycoarana.memkched.internal.text
 
+import com.raycoarana.memkched.internal.SocketChannelWrapper
 import java.lang.StringBuilder
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousSocketChannel
@@ -11,14 +12,18 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.min
 
-class TextProtocolChannelWrapper(
-    private val channel: AsynchronousSocketChannel,
+class TextProtocolSocketChannelWrapper(
     bufferSize: Int = 4096,
     private val readTimeout: Int = 30,
     private val writeTimeout: Int = 30
-) {
+): SocketChannelWrapper() {
     private val inBuffer = ByteBuffer.allocateDirect(bufferSize)
     private val outBuffer = ByteBuffer.allocateDirect(bufferSize)
+
+    override fun reset() {
+        inBuffer.clear()
+        outBuffer.clear()
+    }
 
     suspend fun writeBinary(byteArray: ByteArray): Unit =
         write(byteArray)
