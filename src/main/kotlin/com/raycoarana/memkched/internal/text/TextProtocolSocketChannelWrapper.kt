@@ -12,16 +12,18 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.math.min
 
-class TextProtocolSocketChannelWrapper(
-    bufferSize: Int = 4096,
-    private val readTimeout: Int = 30,
-    private val writeTimeout: Int = 30
+internal class TextProtocolSocketChannelWrapper(
+    inBufferSize: Int,
+    outBufferSize: Int,
+    private val readTimeout: Int,
+    private val writeTimeout: Int
 ): SocketChannelWrapper() {
-    private val inBuffer = ByteBuffer.allocateDirect(bufferSize)
-    private val outBuffer = ByteBuffer.allocateDirect(bufferSize)
+    private val inBuffer = ByteBuffer.allocateDirect(inBufferSize)
+    private val outBuffer = ByteBuffer.allocateDirect(outBufferSize)
 
     override fun reset() {
         inBuffer.clear()
+        inBuffer.limit(0)
         outBuffer.clear()
     }
 
@@ -29,8 +31,6 @@ class TextProtocolSocketChannelWrapper(
         write(byteArray)
 
     suspend fun writeLine(line: String) {
-        require(line.substring(line.length - 2, line.length) == EOL)
-
         val byteArray = line.toByteArray(Charsets.US_ASCII)
         write(byteArray)
     }

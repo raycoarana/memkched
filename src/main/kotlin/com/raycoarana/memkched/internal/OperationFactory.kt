@@ -9,7 +9,7 @@ import com.raycoarana.memkched.internal.result.*
 /**
  * Factory interface to build the different operations
  */
-interface OperationFactory<T : SocketChannelWrapper> {
+internal interface OperationFactory<T : SocketChannelWrapper> {
     fun get(key: String): Operation<T, GetResult>
     fun get(keys: List<String>): Operation<T, MultiGetResult>
     fun gets(key: String): Operation<T, GetsResult>
@@ -22,42 +22,42 @@ interface OperationFactory<T : SocketChannelWrapper> {
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         replay: Reply = Reply.DEFAULT
     ): Operation<T, SetResult>
     fun add(
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         replay: Reply = Reply.DEFAULT
     ): Operation<T, AddResult>
     fun replace(
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         replay: Reply = Reply.DEFAULT
     ): Operation<T, ReplaceResult>
     fun append(
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         replay: Reply = Reply.DEFAULT
     ): Operation<T, AppendResult>
     fun prepend(
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         replay: Reply = Reply.DEFAULT
     ): Operation<T, PrependResult>
     fun cas(
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         casUnique: CasUnique,
         replay: Reply = Reply.DEFAULT
     ): Operation<T, CasResult>

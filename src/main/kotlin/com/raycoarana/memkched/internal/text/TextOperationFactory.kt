@@ -7,8 +7,9 @@ import com.raycoarana.memkched.api.Reply
 import com.raycoarana.memkched.internal.Operation
 import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.result.*
+import com.raycoarana.memkched.internal.text.operation.SetOperation
 
-class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> {
+internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> {
     override fun get(key: String): Operation<TextProtocolSocketChannelWrapper, GetResult> {
         TODO("Not yet implemented")
     }
@@ -51,17 +52,15 @@ class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> 
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         replay: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, SetResult> {
-        TODO("Not yet implemented")
-    }
+    ) = SetOperation(key, flags, expiration, data, replay)
 
     override fun add(
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         replay: Reply
     ): Operation<TextProtocolSocketChannelWrapper, AddResult> {
         TODO("Not yet implemented")
@@ -71,7 +70,7 @@ class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> 
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         replay: Reply
     ): Operation<TextProtocolSocketChannelWrapper, ReplaceResult> {
         TODO("Not yet implemented")
@@ -81,7 +80,7 @@ class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> 
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         replay: Reply
     ): Operation<TextProtocolSocketChannelWrapper, AppendResult> {
         TODO("Not yet implemented")
@@ -91,7 +90,7 @@ class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> 
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         replay: Reply
     ): Operation<TextProtocolSocketChannelWrapper, PrependResult> {
         TODO("Not yet implemented")
@@ -101,7 +100,7 @@ class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> 
         key: String,
         flags: Flags,
         expiration: Expiration,
-        dataSize: Int,
+        data: ByteArray,
         casUnique: CasUnique,
         replay: Reply
     ): Operation<TextProtocolSocketChannelWrapper, CasResult> {

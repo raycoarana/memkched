@@ -4,7 +4,7 @@ import com.raycoarana.memkched.internal.result.Result
 import kotlinx.coroutines.CompletableDeferred
 import java.nio.channels.AsynchronousSocketChannel
 
-abstract class Operation<T : SocketChannelWrapper, R : Result> {
+internal abstract class Operation<in T : SocketChannelWrapper, out R : Result> {
     private val deferred: CompletableDeferred<R> = CompletableDeferred()
 
     suspend fun execute(socketChannel: T) {

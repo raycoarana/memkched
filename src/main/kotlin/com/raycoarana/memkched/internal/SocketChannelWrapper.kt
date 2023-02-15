@@ -2,7 +2,7 @@ package com.raycoarana.memkched.internal
 
 import java.nio.channels.AsynchronousSocketChannel
 
-abstract class SocketChannelWrapper {
+internal abstract class SocketChannelWrapper {
     protected lateinit var channel: AsynchronousSocketChannel
 
     fun wrap(socketChannel: AsynchronousSocketChannel) {
