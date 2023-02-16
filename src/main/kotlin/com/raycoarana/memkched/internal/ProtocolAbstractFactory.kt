@@ -19,7 +19,8 @@ internal interface ProtocolAbstractFactory<out T : SocketChannelWrapper> {
         nodeWorkerFactory = createNodeWorkerFactory(socketConfig),
         channel = Channel(queueSize),
         addresses = addresses,
-        threadPoolInitialSize = socketConfig.nioThreadPoolInitialSize)
+        threadPoolInitialSize = socketConfig.nioThreadPoolInitialSize
+    )
 
     companion object {
         fun create(protocol: Protocol): ProtocolAbstractFactory<SocketChannelWrapper> =

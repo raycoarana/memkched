@@ -3,7 +3,6 @@ package com.raycoarana.memkched.internal.text
 import com.raycoarana.memkched.internal.SocketChannelWrapper
 import java.lang.StringBuilder
 import java.nio.ByteBuffer
-import java.nio.channels.AsynchronousSocketChannel
 import java.nio.channels.CompletionHandler
 import java.util.concurrent.TimeUnit.SECONDS
 import kotlin.coroutines.Continuation
@@ -17,7 +16,7 @@ internal class TextProtocolSocketChannelWrapper(
     outBufferSize: Int,
     private val readTimeout: Int,
     private val writeTimeout: Int
-): SocketChannelWrapper() {
+) : SocketChannelWrapper() {
     private val inBuffer = ByteBuffer.allocateDirect(inBufferSize)
     private val outBuffer = ByteBuffer.allocateDirect(outBufferSize)
 

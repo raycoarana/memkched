@@ -5,7 +5,7 @@ import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.ProtocolAbstractFactory
 import com.raycoarana.memkched.internal.SocketConfig
 
-internal class TextProtocolAbstractFactory: ProtocolAbstractFactory<TextProtocolSocketChannelWrapper> {
+internal class TextProtocolAbstractFactory : ProtocolAbstractFactory<TextProtocolSocketChannelWrapper> {
     override fun createOperationFactory(): OperationFactory<TextProtocolSocketChannelWrapper> =
         TextOperationFactory()
     override fun createNodeWorkerFactory(socketConfig: SocketConfig): NodeWorkerFactory<TextProtocolSocketChannelWrapper> =

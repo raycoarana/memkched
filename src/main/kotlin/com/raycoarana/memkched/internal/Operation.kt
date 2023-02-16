@@ -2,7 +2,6 @@ package com.raycoarana.memkched.internal
 
 import com.raycoarana.memkched.internal.result.Result
 import kotlinx.coroutines.CompletableDeferred
-import java.nio.channels.AsynchronousSocketChannel
 
 internal abstract class Operation<in T : SocketChannelWrapper, out R : Result> {
     private val deferred: CompletableDeferred<R> = CompletableDeferred()

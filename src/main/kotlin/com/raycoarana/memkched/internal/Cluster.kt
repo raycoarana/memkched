@@ -1,12 +1,11 @@
 package com.raycoarana.memkched.internal
 
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
 import java.net.InetSocketAddress
 import java.nio.channels.AsynchronousChannelGroup
 import java.util.concurrent.Executors
 
-internal class Cluster<T: SocketChannelWrapper>(
+internal class Cluster<T : SocketChannelWrapper>(
     private val nodeWorkerFactory: NodeWorkerFactory<T>,
     val channel: Channel<Operation<T, *>>,
     addresses: Array<InetSocketAddress>,

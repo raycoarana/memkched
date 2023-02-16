@@ -7,7 +7,6 @@ import com.raycoarana.memkched.internal.Operation
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.internal.result.SetResult.Stored
 import com.raycoarana.memkched.internal.text.CLIENT_ERROR
-import com.raycoarana.memkched.internal.text.EOL
 import com.raycoarana.memkched.internal.text.ERROR
 import com.raycoarana.memkched.internal.text.SERVER_ERROR
 import com.raycoarana.memkched.internal.text.STORED
