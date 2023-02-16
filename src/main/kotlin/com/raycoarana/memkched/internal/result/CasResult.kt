@@ -1,4 +1,6 @@
 package com.raycoarana.memkched.internal.result
 
-class CasResult : Result {
+sealed class CasResult {
+    object Exists : CasResult()
+    object NotFound : CasResult()
 }

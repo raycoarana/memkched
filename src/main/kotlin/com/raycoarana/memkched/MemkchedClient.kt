@@ -7,6 +7,7 @@ import com.raycoarana.memkched.api.Transcoder
 import com.raycoarana.memkched.internal.Cluster
 import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.SocketChannelWrapper
+import com.raycoarana.memkched.internal.result.Result
 import com.raycoarana.memkched.internal.result.SetResult
 import kotlinx.coroutines.channels.Channel
 
@@ -28,7 +29,7 @@ class MemkchedClient internal constructor(
         expiration: Expiration,
         flags: Flags = Flags(),
         reply: Reply = Reply.DEFAULT
-    ): SetResult {
+    ): Result<SetResult> {
         val data = transcoder.encode(value)
         val operation = createOperationFactory.set(key, flags, expiration, data, reply)
         channel.send(operation)

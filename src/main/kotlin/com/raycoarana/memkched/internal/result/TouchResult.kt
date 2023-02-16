@@ -1,4 +1,7 @@
 package com.raycoarana.memkched.internal.result
 
-class TouchResult : Result {
+sealed class TouchResult {
+    object Touched : TouchResult()
+    object NotFound : TouchResult()
+    object NoReply : TouchResult()
 }

@@ -1,4 +1,7 @@
 package com.raycoarana.memkched.internal.result
 
-class DeleteResult : Result {
+sealed class DeleteResult {
+    object Deleted : DeleteResult()
+    object NotFound : DeleteResult()
+    object NoReply : DeleteResult()
 }

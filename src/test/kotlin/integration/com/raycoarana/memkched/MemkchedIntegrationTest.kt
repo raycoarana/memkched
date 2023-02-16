@@ -2,6 +2,7 @@ package com.raycoarana.memkched
 
 import com.raycoarana.memkched.api.Expiration.Relative
 import com.raycoarana.memkched.api.Transcoder
+import com.raycoarana.memkched.internal.result.Result.SuccessResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.test.Containers
 import kotlinx.coroutines.runBlocking
@@ -34,7 +35,7 @@ class MemkchedIntegrationTest {
                     String(source, charset = Charsets.UTF_8)
             }, Relative(100))
 
-            assertEquals(SetResult.Stored, result)
+            assertEquals(SuccessResult(SetResult.Stored), result)
         }
     }
 }

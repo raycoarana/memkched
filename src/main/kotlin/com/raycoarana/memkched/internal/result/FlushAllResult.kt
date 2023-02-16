@@ -1,4 +1,5 @@
 package com.raycoarana.memkched.internal.result
 
-class FlushAllResult : Result {
+sealed class FlushAllResult {
+    object Ok : FlushAllResult()
 }

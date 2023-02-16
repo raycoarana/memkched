@@ -10,49 +10,45 @@ import com.raycoarana.memkched.internal.result.*
  * Factory interface to build the different operations
  */
 internal interface OperationFactory<T : SocketChannelWrapper> {
-    fun get(key: String): Operation<T, GetResult>
-    fun get(keys: List<String>): Operation<T, MultiGetResult>
-    fun gets(key: String): Operation<T, GetsResult>
-    fun gets(keys: List<String>): Operation<T, MultiGetsResult>
-    fun gat(key: String, expiration: Expiration): Operation<T, GatResult>
-    fun gat(keys: List<String>, expiration: Expiration): Operation<T, MultiGatResult>
-    fun gats(key: String, expiration: Expiration): Operation<T, GatsResult>
-    fun gats(keys: List<String>, expiration: Expiration): Operation<T, MultiGatsResult>
+    fun get(key: String): Operation<T, Result<GetResult>>
+    fun get(keys: List<String>): Operation<T, Result<MultiGetResult>>
+    fun gets(key: String): Operation<T, Result<GetsResult>>
+    fun gets(keys: List<String>): Operation<T, Result<MultiGetsResult>>
+    fun gat(key: String, expiration: Expiration): Operation<T, Result<GatResult>>
+    fun gat(keys: List<String>, expiration: Expiration): Operation<T, Result<MultiGatResult>>
+    fun gats(key: String, expiration: Expiration): Operation<T, Result<GatsResult>>
+    fun gats(keys: List<String>, expiration: Expiration): Operation<T, Result<MultiGatsResult>>
     fun set(
         key: String,
         flags: Flags,
         expiration: Expiration,
         data: ByteArray,
         replay: Reply = Reply.DEFAULT
-    ): Operation<T, SetResult>
+    ): Operation<T, Result<SetResult>>
     fun add(
         key: String,
         flags: Flags,
         expiration: Expiration,
         data: ByteArray,
         replay: Reply = Reply.DEFAULT
-    ): Operation<T, AddResult>
+    ): Operation<T, Result<AddReplaceResult>>
     fun replace(
         key: String,
         flags: Flags,
         expiration: Expiration,
         data: ByteArray,
         replay: Reply = Reply.DEFAULT
-    ): Operation<T, ReplaceResult>
+    ): Operation<T, Result<AddReplaceResult>>
     fun append(
         key: String,
-        flags: Flags,
-        expiration: Expiration,
         data: ByteArray,
         replay: Reply = Reply.DEFAULT
-    ): Operation<T, AppendResult>
+    ): Operation<T, Result<AppendPrependResult>>
     fun prepend(
         key: String,
-        flags: Flags,
-        expiration: Expiration,
         data: ByteArray,
         replay: Reply = Reply.DEFAULT
-    ): Operation<T, PrependResult>
+    ): Operation<T, Result<AppendPrependResult>>
     fun cas(
         key: String,
         flags: Flags,
@@ -60,10 +56,10 @@ internal interface OperationFactory<T : SocketChannelWrapper> {
         data: ByteArray,
         casUnique: CasUnique,
         replay: Reply = Reply.DEFAULT
-    ): Operation<T, CasResult>
-    fun touch(key: String, expiration: Expiration, replay: Reply = Reply.DEFAULT): Operation<T, TouchResult>
-    fun incr(key: String, value: ULong, replay: Reply = Reply.DEFAULT): Operation<T, IncrResult>
-    fun decr(key: String, value: ULong, replay: Reply = Reply.DEFAULT): Operation<T, DecrResult>
-    fun delete(key: String, replay: Reply = Reply.DEFAULT): Operation<T, DeleteResult>
-    fun flushAll(replay: Reply = Reply.DEFAULT): Operation<T, FlushAllResult>
+    ): Operation<T, Result<CasResult>>
+    fun touch(key: String, expiration: Expiration, replay: Reply = Reply.DEFAULT): Operation<T, Result<TouchResult>>
+    fun incr(key: String, value: ULong, replay: Reply = Reply.DEFAULT): Operation<T, Result<IncrDecrResult>>
+    fun decr(key: String, value: ULong, replay: Reply = Reply.DEFAULT): Operation<T, Result<IncrDecrResult>>
+    fun delete(key: String, replay: Reply = Reply.DEFAULT): Operation<T, Result<DeleteResult>>
+    fun flushAll(replay: Reply = Reply.DEFAULT): Operation<T, Result<FlushAllResult>>
 }
