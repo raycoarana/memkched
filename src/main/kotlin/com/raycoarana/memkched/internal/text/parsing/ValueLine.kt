@@ -12,9 +12,6 @@ internal data class ValueLine(
     val casUnique: CasUnique?
 ) {
     companion object {
-        /**
-         * VALUE <key> <flags> <bytes> [<cas unique>]\r\n
-         */
         fun parseValue(result: String): ValueLine {
             val tokenizer = StringTokenizer(result)
             require(tokenizer.nextToken() == VALUE) {
