@@ -10,5 +10,13 @@ class Flags : BitSet(FLAGS_BIT_SIZE) {
 
     companion object {
         private const val FLAGS_BIT_SIZE = 16
+
+        fun from(value: UShort): Flags {
+            val flags = Flags()
+            if (value != 0.toUShort()) {
+                flags.or(valueOf(LongArray(1) { value.toLong() }))
+            }
+            return flags
+        }
     }
 }
