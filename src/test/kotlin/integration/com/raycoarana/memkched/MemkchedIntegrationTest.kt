@@ -2,7 +2,7 @@ package com.raycoarana.memkched
 
 import com.raycoarana.memkched.api.Expiration.Relative
 import com.raycoarana.memkched.api.Transcoder
-import com.raycoarana.memkched.internal.result.Result.SuccessResult
+import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.test.Containers
 import kotlinx.coroutines.runBlocking
@@ -27,9 +27,14 @@ class MemkchedIntegrationTest {
         runBlocking {
             client.initialize()
 
-            val result = client.set("some-key", "some-data", StringToBytesTranscoder, Relative(100))
+            val getResult = client.get("some-key", StringToBytesTranscoder)
+            assertEquals(GetResult.NotFound, getResult)
 
-            assertEquals(SuccessResult(SetResult.Stored), result)
+            val result = client.set("some-key", "some-data", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val getResultAfterSet = client.get("some-key", StringToBytesTranscoder)
+            assertEquals(GetResult.Value("some-data"), getResultAfterSet)
         }
     }
 

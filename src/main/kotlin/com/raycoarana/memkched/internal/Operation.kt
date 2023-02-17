@@ -1,10 +1,9 @@
 package com.raycoarana.memkched.internal
 
-import com.raycoarana.memkched.internal.result.Result
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
 
-internal abstract class Operation<in T : SocketChannelWrapper, out R : Result<*>> {
+internal abstract class Operation<in T : SocketChannelWrapper, out R> {
     private val deferred: CompletableDeferred<R> = CompletableDeferred()
 
     @Suppress("TooGenericExceptionCaught")
@@ -12,6 +11,8 @@ internal abstract class Operation<in T : SocketChannelWrapper, out R : Result<*>
         try {
             val result = run(socketChannel)
             deferred.complete(result)
+        } catch (ex: MemcachedException) {
+            deferred.completeExceptionally(ex)
         } catch (ex: Exception) {
             deferred.completeExceptionally(ex)
             throw ex

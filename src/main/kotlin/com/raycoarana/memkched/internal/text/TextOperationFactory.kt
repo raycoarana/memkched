@@ -20,52 +20,51 @@ import com.raycoarana.memkched.internal.result.MultiGatResult
 import com.raycoarana.memkched.internal.result.MultiGatsResult
 import com.raycoarana.memkched.internal.result.MultiGetResult
 import com.raycoarana.memkched.internal.result.MultiGetsResult
-import com.raycoarana.memkched.internal.result.Result
 import com.raycoarana.memkched.internal.result.TouchResult
 import com.raycoarana.memkched.internal.text.operation.SetOperation
 
 internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> {
-    override fun get(key: String): Operation<TextProtocolSocketChannelWrapper, Result<GetResult>> {
+    override fun get(key: String): Operation<TextProtocolSocketChannelWrapper, GetResult<ByteArray>> {
         TODO("Not yet implemented")
     }
 
-    override fun get(keys: List<String>): Operation<TextProtocolSocketChannelWrapper, Result<MultiGetResult>> {
+    override fun get(keys: List<String>): Operation<TextProtocolSocketChannelWrapper, MultiGetResult<ByteArray>> {
         TODO("Not yet implemented")
     }
 
-    override fun gets(key: String): Operation<TextProtocolSocketChannelWrapper, Result<GetsResult>> {
+    override fun gets(key: String): Operation<TextProtocolSocketChannelWrapper, GetsResult<ByteArray>> {
         TODO("Not yet implemented")
     }
 
-    override fun gets(keys: List<String>): Operation<TextProtocolSocketChannelWrapper, Result<MultiGetsResult>> {
+    override fun gets(keys: List<String>): Operation<TextProtocolSocketChannelWrapper, MultiGetsResult<ByteArray>> {
         TODO("Not yet implemented")
     }
 
     override fun gat(
         key: String,
         expiration: Expiration
-    ): Operation<TextProtocolSocketChannelWrapper, Result<GatResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, GatResult<ByteArray>> {
         TODO("Not yet implemented")
     }
 
     override fun gat(
         keys: List<String>,
         expiration: Expiration
-    ): Operation<TextProtocolSocketChannelWrapper, Result<MultiGatResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, MultiGatResult<ByteArray>> {
         TODO("Not yet implemented")
     }
 
     override fun gats(
         key: String,
         expiration: Expiration
-    ): Operation<TextProtocolSocketChannelWrapper, Result<GatsResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, GatsResult<ByteArray>> {
         TODO("Not yet implemented")
     }
 
     override fun gats(
         keys: List<String>,
         expiration: Expiration
-    ): Operation<TextProtocolSocketChannelWrapper, Result<MultiGatsResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, MultiGatsResult<ByteArray>> {
         TODO("Not yet implemented")
     }
 
@@ -83,7 +82,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         expiration: Expiration,
         data: ByteArray,
         replay: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, Result<AddReplaceResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, AddReplaceResult> {
         TODO("Not yet implemented")
     }
 
@@ -93,7 +92,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         expiration: Expiration,
         data: ByteArray,
         replay: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, Result<AddReplaceResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, AddReplaceResult> {
         TODO("Not yet implemented")
     }
 
@@ -101,7 +100,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         key: String,
         data: ByteArray,
         replay: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, Result<AppendPrependResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, AppendPrependResult> {
         TODO("Not yet implemented")
     }
 
@@ -109,7 +108,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         key: String,
         data: ByteArray,
         replay: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, Result<AppendPrependResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, AppendPrependResult> {
         TODO("Not yet implemented")
     }
 
@@ -120,7 +119,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         data: ByteArray,
         casUnique: CasUnique,
         replay: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, Result<CasResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, CasResult> {
         TODO("Not yet implemented")
     }
 
@@ -128,7 +127,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         key: String,
         expiration: Expiration,
         replay: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, Result<TouchResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, TouchResult> {
         TODO("Not yet implemented")
     }
 
@@ -136,7 +135,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         key: String,
         value: ULong,
         replay: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, Result<IncrDecrResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, IncrDecrResult> {
         TODO("Not yet implemented")
     }
 
@@ -144,15 +143,15 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         key: String,
         value: ULong,
         replay: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, Result<IncrDecrResult>> {
+    ): Operation<TextProtocolSocketChannelWrapper, IncrDecrResult> {
         TODO("Not yet implemented")
     }
 
-    override fun delete(key: String, replay: Reply): Operation<TextProtocolSocketChannelWrapper, Result<DeleteResult>> {
+    override fun delete(key: String, replay: Reply): Operation<TextProtocolSocketChannelWrapper, DeleteResult> {
         TODO("Not yet implemented")
     }
 
-    override fun flushAll(replay: Reply): Operation<TextProtocolSocketChannelWrapper, Result<FlushAllResult>> {
+    override fun flushAll(replay: Reply): Operation<TextProtocolSocketChannelWrapper, FlushAllResult> {
         TODO("Not yet implemented")
     }
 }

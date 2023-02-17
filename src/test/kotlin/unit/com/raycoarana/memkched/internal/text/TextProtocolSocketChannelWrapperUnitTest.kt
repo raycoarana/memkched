@@ -18,7 +18,7 @@ class TextProtocolSocketChannelWrapperUnitTest {
     private val channelWrapper = TextProtocolSocketChannelWrapper(
         4096,
         4096,
-        30,
+        31,
         30
     )
 
@@ -27,7 +27,7 @@ class TextProtocolSocketChannelWrapperUnitTest {
         channelWrapper.wrap(socketChannel)
 
         val writtenChunks = ArrayList<ByteArray>()
-        every { socketChannel.write(any(), 30, TimeUnit.SECONDS, any<Int>(), any()) } answers {
+        every { socketChannel.write(any(), 30, TimeUnit.MILLISECONDS, any<Int>(), any()) } answers {
             val buffer = invocation.args[0] as ByteBuffer
             val handler = invocation.args[4] as CompletionHandler<Int, Continuation<Int>>
 
@@ -57,7 +57,7 @@ class TextProtocolSocketChannelWrapperUnitTest {
     fun `successfully read text line`() {
         channelWrapper.wrap(socketChannel)
 
-        every { socketChannel.read(any(), 30, TimeUnit.SECONDS, any<Int>(), any()) } answers {
+        every { socketChannel.read(any(), 31, TimeUnit.MILLISECONDS, any<Int>(), any()) } answers {
             val buffer = invocation.args[0] as ByteBuffer
             val handler = invocation.args[4] as CompletionHandler<Int, Continuation<Int>>
 
