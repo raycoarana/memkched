@@ -10,7 +10,9 @@ import com.raycoarana.memkched.internal.text.parsing.ValueLine
 internal class MultiGetOperation(
     private val keys: List<String>
 ) : Operation<TextProtocolSocketChannelWrapper, Map<String, GetResult<ByteArray>>>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): Map<String, GetResult<ByteArray>> {
+    override suspend fun run(
+        socketChannelWrapper: TextProtocolSocketChannelWrapper
+    ): Map<String, GetResult<ByteArray>> {
         val cmd = keys.joinToString(separator = " ", prefix = "get ")
         socketChannelWrapper.writeLine(cmd)
         var endLineCandidate = socketChannelWrapper.readLine()

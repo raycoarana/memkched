@@ -7,7 +7,6 @@ import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.test.Containers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.testcontainers.junit.jupiter.Container

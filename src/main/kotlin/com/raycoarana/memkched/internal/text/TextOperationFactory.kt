@@ -28,7 +28,9 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         TODO("Not yet implemented")
     }
 
-    override fun gets(keys: List<String>): Operation<TextProtocolSocketChannelWrapper, Map<String, GetsResult<ByteArray>>> {
+    override fun gets(
+        keys: List<String>
+    ): Operation<TextProtocolSocketChannelWrapper, Map<String, GetsResult<ByteArray>>> {
         TODO("Not yet implemented")
     }
 
