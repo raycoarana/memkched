@@ -1,10 +1,9 @@
 package com.raycoarana.memkched.internal.text
 
 import com.raycoarana.memkched.internal.SocketChannelWrapper
-import java.lang.StringBuilder
 import java.nio.ByteBuffer
 import java.nio.channels.CompletionHandler
-import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -14,8 +13,8 @@ import kotlin.math.min
 internal class TextProtocolSocketChannelWrapper(
     inBufferSize: Int,
     outBufferSize: Int,
-    private val readTimeout: Int,
-    private val writeTimeout: Int
+    private val readTimeout: Long,
+    private val writeTimeout: Long
 ) : SocketChannelWrapper() {
     private val inBuffer = ByteBuffer.allocateDirect(inBufferSize)
     private val outBuffer = ByteBuffer.allocateDirect(outBufferSize)
@@ -91,7 +90,7 @@ internal class TextProtocolSocketChannelWrapper(
         suspendCoroutine { continuation ->
             val limit = min(inBuffer.capacity(), byteToRead ?: Int.MAX_VALUE)
             inBuffer.clear().limit(limit)
-            channel.read(inBuffer, readTimeout.toLong(), SECONDS, continuation, Handler)
+            channel.read(inBuffer, readTimeout, MILLISECONDS, continuation, Handler)
         }
 
     private suspend inline fun write(byteArray: ByteArray) {
@@ -118,7 +117,7 @@ internal class TextProtocolSocketChannelWrapper(
     private suspend inline fun writeChunk(): Int =
         suspendCoroutine { continuation ->
             outBuffer.flip()
-            channel.write(outBuffer, writeTimeout.toLong(), SECONDS, continuation, Handler)
+            channel.write(outBuffer, writeTimeout, MILLISECONDS, continuation, Handler)
         }
 
     object Handler : CompletionHandler<Int, Continuation<Int>> {

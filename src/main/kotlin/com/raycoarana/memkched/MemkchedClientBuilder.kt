@@ -2,6 +2,7 @@ package com.raycoarana.memkched
 
 import com.raycoarana.memkched.api.Protocol
 import com.raycoarana.memkched.api.Protocol.TEXT
+import com.raycoarana.memkched.internal.OperationConfig
 import com.raycoarana.memkched.internal.ProtocolAbstractFactory
 import com.raycoarana.memkched.internal.SocketConfig
 import java.net.InetSocketAddress
@@ -9,11 +10,12 @@ import java.util.concurrent.TimeUnit
 
 class MemkchedClientBuilder {
     private var addresses: Array<InetSocketAddress> = emptyArray()
-    private var operationQueueSize: Int = 1000
-    private var readTimeout: Int = 30
-    private var writeTimeout: Int = 30
-    private var readBufferSize: Int = 4096
-    private var writeBufferSize: Int = 4096
+    private var operationQueueSize: Int = DEFAULT_OPERATION_QUEUE_SIZE
+    private var operationTimeout: Long = DEFAULT_OPERATION_TIMEOUT_IN_MILLIS
+    private var readTimeout: Long = DEFAULT_SOCKET_READ_TIMEOUT_IN_MILLIS
+    private var writeTimeout: Long = DEFAULT_SOCKET_WRITE_TIMEOUT_IN_MILLIS
+    private var readBufferSize: Int = DEFAULT_READ_BUFFER_SIZE
+    private var writeBufferSize: Int = DEFAULT_WRITE_BUFFER_SIZE
     private var protocol: Protocol = TEXT
     private var nioThreadPoolInitialSize: Int = 2
 
@@ -33,11 +35,11 @@ class MemkchedClientBuilder {
     }
 
     fun readTimeout(value: Long, unit: TimeUnit) = apply {
-        readTimeout = unit.toSeconds(value).toInt()
+        readTimeout = unit.toMillis(value)
     }
 
     fun writeTimeout(value: Long, unit: TimeUnit) = apply {
-        writeTimeout = unit.toSeconds(value).toInt()
+        writeTimeout = unit.toMillis(value)
     }
 
     fun bufferSize(value: Long) = apply {
@@ -61,6 +63,14 @@ class MemkchedClientBuilder {
         nioThreadPoolInitialSize = value
     }
 
+    fun operationQueueSize(value: Int) = apply {
+        operationQueueSize = value
+    }
+
+    fun operationTimeout(value: Long, unit: TimeUnit) = apply {
+        operationTimeout = unit.toMillis(value)
+    }
+
     fun build(): MemkchedClient {
         require(addresses.isNotEmpty()) { "At least one address must be specified." }
 
@@ -73,6 +83,18 @@ class MemkchedClientBuilder {
             nioThreadPoolInitialSize = nioThreadPoolInitialSize
         )
         val cluster = factory.createCluster(operationQueueSize, socketConfig, addresses)
-        return MemkchedClient(factory.createOperationFactory(), cluster)
+        val operationConfig = OperationConfig(
+            timeout = operationTimeout
+        )
+        return MemkchedClient(factory.createOperationFactory(), cluster, operationConfig)
+    }
+
+    companion object {
+        private const val DEFAULT_OPERATION_QUEUE_SIZE = 1000
+        private const val DEFAULT_OPERATION_TIMEOUT_IN_MILLIS = 5000L
+        private const val DEFAULT_SOCKET_READ_TIMEOUT_IN_MILLIS = 5000L
+        private const val DEFAULT_SOCKET_WRITE_TIMEOUT_IN_MILLIS = 5000L
+        private const val DEFAULT_READ_BUFFER_SIZE = 4096
+        private const val DEFAULT_WRITE_BUFFER_SIZE = 4096
     }
 }

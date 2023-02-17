@@ -4,7 +4,23 @@ import com.raycoarana.memkched.api.CasUnique
 import com.raycoarana.memkched.api.Expiration
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
-import com.raycoarana.memkched.internal.result.*
+import com.raycoarana.memkched.internal.result.AddReplaceResult
+import com.raycoarana.memkched.internal.result.AppendPrependResult
+import com.raycoarana.memkched.internal.result.CasResult
+import com.raycoarana.memkched.internal.result.DeleteResult
+import com.raycoarana.memkched.internal.result.FlushAllResult
+import com.raycoarana.memkched.internal.result.GatResult
+import com.raycoarana.memkched.internal.result.GatsResult
+import com.raycoarana.memkched.internal.result.GetResult
+import com.raycoarana.memkched.internal.result.GetsResult
+import com.raycoarana.memkched.internal.result.IncrDecrResult
+import com.raycoarana.memkched.internal.result.MultiGatResult
+import com.raycoarana.memkched.internal.result.MultiGatsResult
+import com.raycoarana.memkched.internal.result.MultiGetResult
+import com.raycoarana.memkched.internal.result.MultiGetsResult
+import com.raycoarana.memkched.internal.result.Result
+import com.raycoarana.memkched.internal.result.SetResult
+import com.raycoarana.memkched.internal.result.TouchResult
 
 /**
  * Factory interface to build the different operations

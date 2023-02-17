@@ -5,6 +5,7 @@ import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
 import com.raycoarana.memkched.api.Transcoder
 import com.raycoarana.memkched.internal.Cluster
+import com.raycoarana.memkched.internal.OperationConfig
 import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.SocketChannelWrapper
 import com.raycoarana.memkched.internal.result.Result
@@ -14,10 +15,11 @@ import kotlinx.coroutines.channels.Channel
 class MemkchedClient internal constructor(
     private val createOperationFactory: OperationFactory<out SocketChannelWrapper>,
     private val cluster: Cluster<out SocketChannelWrapper>,
-
+    private val operationConfig: OperationConfig
+) {
     @Suppress("UNCHECKED_CAST")
     private val channel: Channel<Any> = cluster.channel as Channel<Any>
-) {
+
     suspend fun initialize() {
         cluster.start()
     }
@@ -34,7 +36,6 @@ class MemkchedClient internal constructor(
         val operation = createOperationFactory.set(key, flags, expiration, data, reply)
         channel.send(operation)
 
-        // TODO: Should add timeout here?
-        return operation.await()
+        return operation.await(operationConfig.timeout)
     }
 }

@@ -1,5 +1,7 @@
 package com.raycoarana.memkched.internal
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.nio.channels.AsynchronousSocketChannel
 
 internal abstract class SocketChannelWrapper {
@@ -11,4 +13,10 @@ internal abstract class SocketChannelWrapper {
     }
 
     protected abstract fun reset()
+
+    suspend fun close() {
+        withContext(Dispatchers.IO) {
+            channel.close()
+        }
+    }
 }

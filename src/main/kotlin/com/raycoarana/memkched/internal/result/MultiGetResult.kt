@@ -1,7 +1,7 @@
 package com.raycoarana.memkched.internal.result
 
 sealed class MultiGetResult {
-    class Value<T>(val data: Array<T>): MultiGetResult() {
+    class Value<T>(val data: Array<T>) : MultiGetResult() {
         inline fun <reified R> map(block: (T) -> R): Value<R> =
             Value(data.map { block(it) }.toTypedArray())
 

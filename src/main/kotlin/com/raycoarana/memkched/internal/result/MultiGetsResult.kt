@@ -3,7 +3,7 @@ package com.raycoarana.memkched.internal.result
 import com.raycoarana.memkched.api.CasUnique
 
 sealed class MultiGetsResult {
-    class Value<T>(val data: Array<Item<T>>): MultiGetsResult() {
+    class Value<T>(val data: Array<Item<T>>) : MultiGetsResult() {
         inline fun <reified R> map(block: (T) -> R): Value<R> =
             Value(data.map { Item(block(it.data), it.casUnique) }.toTypedArray())
 

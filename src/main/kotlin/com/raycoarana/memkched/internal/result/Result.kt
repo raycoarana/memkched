@@ -9,8 +9,7 @@ sealed class Result<Data> {
     object ProtocolError : Result<Any>()
     data class ClientError<T>(val reason: String) : Result<T>()
     data class ServerError<T>(val reason: String) : Result<T>()
-
-    data class SuccessResult<Data>(val data: Data): Result<Data>()
+    data class SuccessResult<Data>(val data: Data) : Result<Data>()
 
     companion object {
         private val logger = LoggerFactory.getLogger(Result::class.java)

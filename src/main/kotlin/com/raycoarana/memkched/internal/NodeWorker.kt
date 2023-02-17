@@ -25,36 +25,49 @@ internal class NodeWorker<out T : SocketChannelWrapper>(
 
     suspend fun start() {
         socketChannelWrapper.wrap(socketChannel)
-        socketChannel.connect<Any>(address, this, object : CompletionHandler<Void, Any> {
-            override fun completed(result: Void?, attachment: Any) {
-                // TODO Launch a proper scope
-                GlobalScope.launch(Dispatchers.IO) {
-                    ready.set(true)
-                    processLoop()
+        logger.info("Connecting with node $address")
+        socketChannel.connect<Any>(
+            address,
+            this,
+            object : CompletionHandler<Void, Any> {
+                override fun completed(result: Void?, attachment: Any) {
+                    logger.info("Connected with node $address")
+                    // TODO Launch a proper scope
+                    GlobalScope.launch(Dispatchers.IO) {
+                        ready.set(true)
+                        processLoop()
+                    }
+                }
+
+                override fun failed(ex: Throwable, attachment: Any) {
+                    ready.set(false)
+                    logger.error("Connection failure to node $address", ex)
                 }
             }
-
-            override fun failed(ex: Throwable, attachment: Any) {
-                ready.set(false)
-                logger.error("Connection failure to node $address", ex)
-            }
-        })
+        )
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private suspend fun processLoop() {
+        logger.info("Node worker $address process loop started.")
         while (ready.get()) {
             try {
                 val operation = receiveChannel.receive()
                 operation.execute(socketChannelWrapper)
             } catch (ex: ClosedReceiveChannelException) {
-                // TODO Channel closed, disconnect the node
+                logger.error("Operation channel closed at received in node $address", ex)
                 ready.set(false)
+                socketChannelWrapper.close()
             } catch (ex: Exception) {
                 logger.error("Failure in socket with node $address", ex)
-                // TODO: abort operation? restart socket and relaunch operation? re-enqueue op in channel?
+                socketChannelWrapper.close()
+                logger.info("Try reconnection with node $address", ex)
+                ready.set(false)
+                start()
+                break
             }
         }
-        logger.info("Node worker $address stopped.")
+        logger.info("Node worker $address proccess loop stopped.")
     }
 
     fun stop() {

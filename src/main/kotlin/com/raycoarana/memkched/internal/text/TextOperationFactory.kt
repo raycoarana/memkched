@@ -6,7 +6,22 @@ import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
 import com.raycoarana.memkched.internal.Operation
 import com.raycoarana.memkched.internal.OperationFactory
-import com.raycoarana.memkched.internal.result.*
+import com.raycoarana.memkched.internal.result.AddReplaceResult
+import com.raycoarana.memkched.internal.result.AppendPrependResult
+import com.raycoarana.memkched.internal.result.CasResult
+import com.raycoarana.memkched.internal.result.DeleteResult
+import com.raycoarana.memkched.internal.result.FlushAllResult
+import com.raycoarana.memkched.internal.result.GatResult
+import com.raycoarana.memkched.internal.result.GatsResult
+import com.raycoarana.memkched.internal.result.GetResult
+import com.raycoarana.memkched.internal.result.GetsResult
+import com.raycoarana.memkched.internal.result.IncrDecrResult
+import com.raycoarana.memkched.internal.result.MultiGatResult
+import com.raycoarana.memkched.internal.result.MultiGatsResult
+import com.raycoarana.memkched.internal.result.MultiGetResult
+import com.raycoarana.memkched.internal.result.MultiGetsResult
+import com.raycoarana.memkched.internal.result.Result
+import com.raycoarana.memkched.internal.result.TouchResult
 import com.raycoarana.memkched.internal.text.operation.SetOperation
 
 internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> {
@@ -26,7 +41,10 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         TODO("Not yet implemented")
     }
 
-    override fun gat(key: String, expiration: Expiration): Operation<TextProtocolSocketChannelWrapper, Result<GatResult>> {
+    override fun gat(
+        key: String,
+        expiration: Expiration
+    ): Operation<TextProtocolSocketChannelWrapper, Result<GatResult>> {
         TODO("Not yet implemented")
     }
 
@@ -37,7 +55,10 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         TODO("Not yet implemented")
     }
 
-    override fun gats(key: String, expiration: Expiration): Operation<TextProtocolSocketChannelWrapper, Result<GatsResult>> {
+    override fun gats(
+        key: String,
+        expiration: Expiration
+    ): Operation<TextProtocolSocketChannelWrapper, Result<GatsResult>> {
         TODO("Not yet implemented")
     }
 

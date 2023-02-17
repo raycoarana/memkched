@@ -27,15 +27,17 @@ class MemkchedIntegrationTest {
         runBlocking {
             client.initialize()
 
-            val result = client.set("some-key", "some-data", object : Transcoder<String> {
-                override suspend fun encode(value: String): ByteArray =
-                    value.toByteArray(Charsets.UTF_8)
-
-                override suspend fun decode(source: ByteArray): String =
-                    String(source, charset = Charsets.UTF_8)
-            }, Relative(100))
+            val result = client.set("some-key", "some-data", StringToBytesTranscoder, Relative(100))
 
             assertEquals(SuccessResult(SetResult.Stored), result)
         }
+    }
+
+    object StringToBytesTranscoder : Transcoder<String> {
+        override suspend fun encode(value: String): ByteArray =
+            value.toByteArray(Charsets.UTF_8)
+
+        override suspend fun decode(source: ByteArray): String =
+            String(source, charset = Charsets.UTF_8)
     }
 }
