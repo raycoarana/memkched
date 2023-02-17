@@ -14,10 +14,6 @@ import com.raycoarana.memkched.internal.result.GatsResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
-import com.raycoarana.memkched.internal.result.MultiGatResult
-import com.raycoarana.memkched.internal.result.MultiGatsResult
-import com.raycoarana.memkched.internal.result.MultiGetResult
-import com.raycoarana.memkched.internal.result.MultiGetsResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.internal.result.TouchResult
 
@@ -26,13 +22,13 @@ import com.raycoarana.memkched.internal.result.TouchResult
  */
 internal interface OperationFactory<T : SocketChannelWrapper> {
     fun get(key: String): Operation<T, GetResult<ByteArray>>
-    fun get(keys: List<String>): Operation<T, MultiGetResult<ByteArray>>
+    fun get(keys: List<String>): Operation<T, Map<String, GetResult<ByteArray>>>
     fun gets(key: String): Operation<T, GetsResult<ByteArray>>
-    fun gets(keys: List<String>): Operation<T, MultiGetsResult<ByteArray>>
+    fun gets(keys: List<String>): Operation<T, Map<String, GetsResult<ByteArray>>>
     fun gat(key: String, expiration: Expiration): Operation<T, GatResult<ByteArray>>
-    fun gat(keys: List<String>, expiration: Expiration): Operation<T, MultiGatResult<ByteArray>>
+    fun gat(keys: List<String>, expiration: Expiration): Operation<T, Map<String, GatResult<ByteArray>>>
     fun gats(key: String, expiration: Expiration): Operation<T, GatsResult<ByteArray>>
-    fun gats(keys: List<String>, expiration: Expiration): Operation<T, MultiGatsResult<ByteArray>>
+    fun gats(keys: List<String>, expiration: Expiration): Operation<T, Map<String, GatsResult<ByteArray>>>
     fun set(
         key: String,
         flags: Flags,

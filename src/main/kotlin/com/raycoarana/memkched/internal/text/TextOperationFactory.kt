@@ -13,30 +13,22 @@ import com.raycoarana.memkched.internal.result.DeleteResult
 import com.raycoarana.memkched.internal.result.FlushAllResult
 import com.raycoarana.memkched.internal.result.GatResult
 import com.raycoarana.memkched.internal.result.GatsResult
-import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
-import com.raycoarana.memkched.internal.result.MultiGatResult
-import com.raycoarana.memkched.internal.result.MultiGatsResult
-import com.raycoarana.memkched.internal.result.MultiGetResult
-import com.raycoarana.memkched.internal.result.MultiGetsResult
 import com.raycoarana.memkched.internal.result.TouchResult
+import com.raycoarana.memkched.internal.text.operation.GetOperation
+import com.raycoarana.memkched.internal.text.operation.MultiGetOperation
 import com.raycoarana.memkched.internal.text.operation.SetOperation
 
 internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> {
-    override fun get(key: String): Operation<TextProtocolSocketChannelWrapper, GetResult<ByteArray>> {
-        TODO("Not yet implemented")
-    }
-
-    override fun get(keys: List<String>): Operation<TextProtocolSocketChannelWrapper, MultiGetResult<ByteArray>> {
-        TODO("Not yet implemented")
-    }
+    override fun get(key: String) = GetOperation(key)
+    override fun get(keys: List<String>) = MultiGetOperation(keys)
 
     override fun gets(key: String): Operation<TextProtocolSocketChannelWrapper, GetsResult<ByteArray>> {
         TODO("Not yet implemented")
     }
 
-    override fun gets(keys: List<String>): Operation<TextProtocolSocketChannelWrapper, MultiGetsResult<ByteArray>> {
+    override fun gets(keys: List<String>): Operation<TextProtocolSocketChannelWrapper, Map<String, GetsResult<ByteArray>>> {
         TODO("Not yet implemented")
     }
 
@@ -50,7 +42,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
     override fun gat(
         keys: List<String>,
         expiration: Expiration
-    ): Operation<TextProtocolSocketChannelWrapper, MultiGatResult<ByteArray>> {
+    ): Operation<TextProtocolSocketChannelWrapper, Map<String, GatResult<ByteArray>>> {
         TODO("Not yet implemented")
     }
 
@@ -64,7 +56,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
     override fun gats(
         keys: List<String>,
         expiration: Expiration
-    ): Operation<TextProtocolSocketChannelWrapper, MultiGatsResult<ByteArray>> {
+    ): Operation<TextProtocolSocketChannelWrapper, Map<String, GatsResult<ByteArray>>> {
         TODO("Not yet implemented")
     }
 

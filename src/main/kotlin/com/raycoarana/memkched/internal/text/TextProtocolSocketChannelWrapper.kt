@@ -50,6 +50,8 @@ internal class TextProtocolSocketChannelWrapper(
             if (inBuffer.position() == inBuffer.limit()) {
                 read = read(size - offset)
                 inBuffer.flip()
+            } else {
+                read = min(inBuffer.limit() - inBuffer.position(), size - offset)
             }
             inBuffer.get(result, offset, read)
             offset += read
@@ -58,7 +60,7 @@ internal class TextProtocolSocketChannelWrapper(
     }
 
     private suspend inline fun readEOL() {
-        var read = 0
+        var read = min(inBuffer.limit() - inBuffer.position(), 2)
         while (read < 2) {
             read += read(2 - read)
         }
