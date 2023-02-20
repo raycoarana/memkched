@@ -63,7 +63,7 @@ class CasCommandUnitTest {
             case(
                 "all flags",
                 "some-key",
-                Flags().also { it.set(0, 16) },
+                Flags().also { it.setAll(0, 16) },
                 Relative(100),
                 1,
                 CasUnique(3),

@@ -34,19 +34,6 @@ class HelloIntegrationTest {
     @Container
     private val memcached = Containers.MEMCACHED
 
-    @Test
-    fun testConvertToUShort() {
-        val bitSet = Flags()
-        bitSet.flip(0, 16)
-        assertEquals(0xFFFF.toUShort(), bitSet.toUShort())
-        bitSet.flip(0, 16)
-        bitSet.flip(15)
-        assertEquals(0x8000.toUShort(), bitSet.toUShort())
-        bitSet.flip(15)
-        bitSet.flip(8)
-        assertEquals(0x0100.toUShort(), bitSet.toUShort())
-    }
-
     private fun ByteBuffer.put(value: String) =
         put(value.toByteArray(Charsets.US_ASCII))
 
