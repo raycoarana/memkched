@@ -6,7 +6,15 @@ import java.util.*
  * BitSet of 16-bit long to store flags associated to the key
  */
 class Flags {
-    private val bitSet = BitSet(FLAGS_BIT_SIZE)
+    private val bitSet: BitSet
+
+    constructor() {
+        bitSet = BitSet(FLAGS_BIT_SIZE)
+    }
+
+    internal constructor(value: BitSet) {
+        bitSet = value
+    }
 
     /**
      * Convert flags bit set into a UShort number ready for transmission in text protocol
@@ -25,35 +33,35 @@ class Flags {
     /**
      * Sets the bit at the specified index to {@code true}.
      *
-     * @param  bitIndex a bit index
-     * @param  value value a boolean value to set
+     * @param bitIndex a bit index
+     * @param value value a boolean value to set
      * @throws IndexOutOfBoundsException if the specified index is negative
      * @return This same instance to keep editing Flags bits
      */
     @Throws(IndexOutOfBoundsException::class)
     fun set(bitIndex: Int, value: Boolean = true) = apply { bitSet.set(bitIndex, value) }
 
-
     /**
      * Sets the bits from the specified {@code fromIndex} (inclusive) to the
      * specified {@code toIndex} (exclusive) to {@code true}.
      *
-     * @param  fromIndex index of the first bit to be set
-     * @param  toIndex index after the last bit to be set
-     * @param  value value to set the selected bits to
+     * @param fromIndex index of the first bit to be set
+     * @param toIndex index after the last bit to be set
+     * @param value value to set the selected bits to
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
      *         or {@code toIndex} is negative, or {@code fromIndex} is
      *         larger than {@code toIndex}
      * @return This same instance to keep editing Flags bits
      */
     @Throws(IndexOutOfBoundsException::class)
-    fun setAll(fromIndex: Int = 0, toIndex: Int = FLAGS_BIT_SIZE, value: Boolean = true) = apply { bitSet.set(fromIndex, toIndex, value) }
+    fun setAll(fromIndex: Int = 0, toIndex: Int = FLAGS_BIT_SIZE, value: Boolean = true) =
+        apply { bitSet.set(fromIndex, toIndex, value) }
 
     /**
      * Sets the bit at the specified index to the complement of its
      * current value.
      *
-     * @param  bitIndex the index of the bit to flip
+     * @param bitIndex the index of the bit to flip
      * @throws IndexOutOfBoundsException if the specified index is negative
      * @return This same instance to keep editing Flags bits
      */
@@ -65,15 +73,66 @@ class Flags {
      * specified {@code toIndex} (exclusive) to the complement of its current
      * value.
      *
-     * @param  fromIndex index of the first bit to flip
-     * @param  toIndex index after the last bit to flip
+     * @param fromIndex index of the first bit to flip
+     * @param toIndex index after the last bit to flip
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
      *         or {@code toIndex} is negative, or {@code fromIndex} is
      *         larger than {@code toIndex}
      * @return This same instance to keep editing Flags bits
      */
     @Throws(IndexOutOfBoundsException::class)
-    fun flipAll(fromIndex: Int = 0, toIndex: Int = FLAGS_BIT_SIZE) = apply { bitSet.flip(fromIndex, toIndex) }
+    fun flipAll(fromIndex: Int = 0, toIndex: Int = FLAGS_BIT_SIZE) =
+        apply { bitSet.flip(fromIndex, toIndex) }
+
+    /**
+     * Sets the bit specified by the index to {@code false}.
+     *
+     * @param bitIndex the index of the bit to be cleared
+     * @throws IndexOutOfBoundsException if the specified index is negative
+     * @return This same instance to keep editing Flags bits
+     */
+    @Throws(IndexOutOfBoundsException::class)
+    fun clear(bitIndex: Int) = apply { bitSet.clear(bitIndex) }
+
+    /**
+     * Sets the bits from the specified {@code fromIndex} (inclusive) to the
+     * specified {@code toIndex} (exclusive) to {@code false}.
+     *
+     * @param fromIndex index of the first bit to be cleared
+     * @param toIndex index after the last bit to be cleared
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
+     *         or {@code toIndex} is negative, or {@code fromIndex} is
+     *         larger than {@code toIndex}
+     * @return This same instance to keep editing Flags bits
+     */
+    @Throws(IndexOutOfBoundsException::class)
+    fun clearAll(fromIndex: Int = 0, toIndex: Int = FLAGS_BIT_SIZE) =
+        apply { bitSet.clear(fromIndex, toIndex) }
+
+    /**
+     * Gets the bit specified by the index.
+     *
+     * @param bitIndex the index of the bit to be returned
+     * @throws IndexOutOfBoundsException if the specified index is negative
+     * @return Boolean value of the bit
+     */
+    @Throws(IndexOutOfBoundsException::class)
+    fun get(bitIndex: Int): Boolean = bitSet.get(bitIndex)
+
+    /**
+     * Get the bits from the specified {@code fromIndex} (inclusive) to the
+     * specified {@code toIndex} (exclusive).
+     *
+     * @param fromIndex index of the first bit to return
+     * @param toIndex index after the last bit to return
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative,
+     *         or {@code toIndex} is negative, or {@code fromIndex} is
+     *         larger than {@code toIndex}
+     * @return A new Flags instance with the specified bits
+     */
+    @Throws(IndexOutOfBoundsException::class)
+    fun getAll(fromIndex: Int = 0, toIndex: Int = FLAGS_BIT_SIZE): Flags =
+         Flags(bitSet.get(fromIndex, toIndex))
 
     /**
      * Performs a logical <b>OR</b> of these flags bits with the {@code Flags}
@@ -169,12 +228,11 @@ class Flags {
     companion object {
         private const val FLAGS_BIT_SIZE = 16
 
-        fun from(value: UShort): Flags {
-            val flags = Flags()
+        fun from(value: UShort): Flags =
             if (value != 0.toUShort()) {
-                flags.bitSet.or(BitSet.valueOf(LongArray(1) { value.toLong() }))
+                Flags(BitSet.valueOf(LongArray(1) { value.toLong() }))
+            } else {
+                Flags()
             }
-            return flags
-        }
     }
 }

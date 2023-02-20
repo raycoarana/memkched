@@ -59,6 +59,28 @@ class FlagsUnitTest {
     }
 
     @Test
+    fun testClearAnyBitSet() {
+        assertEquals(Flags(), Flags().set(8).clearAll())
+    }
+
+    @Test
+    fun testClearSetField() {
+        assertEquals(Flags().flip(8), Flags().setAll(8, 10).clear(9))
+    }
+
+    @Test
+    fun testGetBit() {
+        val flags = Flags().set(8)
+        assertTrue(flags.get(8))
+        assertFalse(flags.get(7))
+    }
+
+    @Test
+    fun testGetBits() {
+        assertEquals(Flags().flipAll(1, 3), Flags().setAll(8, 10).getAll(7, 10))
+    }
+
+    @Test
     fun testOrOperation() {
         assertEquals(Flags().flip(8).flip(4), Flags().set(8) or Flags().set(4))
     }
