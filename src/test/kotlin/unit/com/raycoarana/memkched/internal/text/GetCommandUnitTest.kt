@@ -9,16 +9,6 @@ import org.junit.jupiter.params.provider.CsvSource
 class GetCommandUnitTest {
     @ParameterizedTest(name = "{0}")
     @CsvSource(
-        "empty key,'','get \r\n'",
-        "simple small key,a,'get a\r\n'",
-    )
-    fun `command get with single key`(case: String, key: String, expected: String) {
-        val command = get(key)
-        assertThat(command).isEqualTo(expected)
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @CsvSource(
         "empty,'','get \r\n'",
         "single small key,a,'get a\r\n'",
         "two small keys,'a,b','get a b\r\n'",

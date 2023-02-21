@@ -24,6 +24,14 @@ class MemkchedClient internal constructor(
         cluster.start()
     }
 
+    /**
+     * Memcached GET operation of a single key
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param transcoder converter to apply to byte array data obtained from the key. Transcoder.IDENTITY will return
+     * the raw ByteArray
+     * @return GetResult child class with the Value or NotFound
+     */
     suspend fun <T> get(key: String, transcoder: Transcoder<T>): GetResult<T> {
         val operation = createOperationFactory.get(key)
         channel.send(operation)

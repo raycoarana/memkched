@@ -33,7 +33,7 @@ class FlagsUnitTest {
 
     @Test
     fun testToStringWhenFlipInLowerByte() {
-        assertEquals("0000000010000000", Flags().flip(8).toString())
+        assertEquals("0000000100000000", Flags().flip(8).toString())
     }
 
     @Test
