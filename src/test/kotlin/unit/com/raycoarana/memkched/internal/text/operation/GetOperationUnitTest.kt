@@ -6,9 +6,10 @@ import com.raycoarana.memkched.internal.result.GetResult.NotFound
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class GetOperationUnitTest : BaseOperationUnitTest<GetResult<ByteArray>>(GetOperation(SOME_KEY)) {
+internal class GetOperationUnitTest : BaseOperationUnitTest<GetResult<ByteArray>>() {
     @Test
     fun `get key when value is not found`() {
+        givenOperation(GetOperation(SOME_KEY))
         expectWrittenLine("get $SOME_KEY")
         givenReadLineReturns("END")
 
@@ -19,6 +20,7 @@ internal class GetOperationUnitTest : BaseOperationUnitTest<GetResult<ByteArray>
 
     @Test
     fun `get key when value is found`() {
+        givenOperation(GetOperation(SOME_KEY))
         expectWrittenLine("get $SOME_KEY")
         givenReadLineReturns("VALUE $SOME_KEY 1 5", "END")
         givenReadBinaryBlock("abcde".toByteArray(Charsets.US_ASCII))
@@ -30,6 +32,7 @@ internal class GetOperationUnitTest : BaseOperationUnitTest<GetResult<ByteArray>
 
     @Test
     fun `fail when get returns a not matching key`() {
+        givenOperation(GetOperation(SOME_KEY))
         expectWrittenLine("get $SOME_KEY")
         givenReadLineReturns("VALUE other-key 1 5", "END")
         givenReadBinaryBlock("abcde".toByteArray(Charsets.US_ASCII))
