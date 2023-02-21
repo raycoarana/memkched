@@ -37,7 +37,7 @@ class MemkchedClient internal constructor(
         channel.send(operation)
 
         val getResult = operation.await(operationConfig.timeout)
-        return getResult.map { data -> transcoder.decode(data) }
+        return getResult.map { flags, data -> transcoder.decode(flags, data) }
     }
 
     suspend fun <T> set(
