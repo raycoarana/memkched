@@ -132,7 +132,7 @@ class Flags {
      */
     @Throws(IndexOutOfBoundsException::class)
     fun getAll(fromIndex: Int = 0, toIndex: Int = FLAGS_BIT_SIZE): Flags =
-         Flags(bitSet.get(fromIndex, toIndex))
+        Flags(bitSet.get(fromIndex, toIndex))
 
     /**
      * Performs a logical <b>OR</b> of these flags bits with the {@code Flags}
