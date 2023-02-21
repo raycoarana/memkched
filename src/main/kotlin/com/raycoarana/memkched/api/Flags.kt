@@ -217,7 +217,7 @@ class Flags {
     }
 
     override fun toString(): String =
-        (0 until FLAGS_BIT_SIZE).joinToString(separator = "") {
+        (FLAGS_BIT_SIZE - 1 downTo 0).joinToString(separator = "") {
             if (bitSet[it]) {
                 "1"
             } else {

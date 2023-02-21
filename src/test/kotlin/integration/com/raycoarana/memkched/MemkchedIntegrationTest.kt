@@ -2,10 +2,10 @@ package com.raycoarana.memkched
 
 import com.raycoarana.memkched.api.Expiration.Relative
 import com.raycoarana.memkched.api.Flags
-import com.raycoarana.memkched.api.Transcoder
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.test.Containers
+import com.raycoarana.memkched.test.StringToBytesTranscoder
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -39,13 +39,5 @@ class MemkchedIntegrationTest {
             val getResultAfterSet = client.get("some-key", StringToBytesTranscoder)
             assertEquals(GetResult.Value(Flags(), "some-data"), getResultAfterSet)
         }
-    }
-
-    object StringToBytesTranscoder : Transcoder<String> {
-        override suspend fun encode(value: String): ByteArray =
-            value.toByteArray(Charsets.UTF_8)
-
-        override suspend fun decode(source: ByteArray): String =
-            String(source, charset = Charsets.UTF_8)
     }
 }
