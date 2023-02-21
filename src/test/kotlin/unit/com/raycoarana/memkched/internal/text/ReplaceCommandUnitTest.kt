@@ -42,7 +42,7 @@ class ReplaceCommandUnitTest {
             case(
                 "some flags",
                 "some-key",
-                Flags().also { it.set(8) },
+                Flags().set(8),
                 Relative(100),
                 1,
                 Reply.DEFAULT,
@@ -51,7 +51,7 @@ class ReplaceCommandUnitTest {
             case(
                 "all flags",
                 "some-key",
-                Flags().also { it.setAll(0, 16) },
+                Flags().setAll(0, 16),
                 Relative(100),
                 1,
                 Reply.DEFAULT,

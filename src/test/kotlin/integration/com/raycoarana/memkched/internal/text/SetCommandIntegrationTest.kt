@@ -28,8 +28,8 @@ class SetCommandIntegrationTest : BaseCommandIntegrationTest() {
         @JvmStatic
         private fun flagsProvider() = listOf(
             Arguments.of(Flags(), 0),
-            Arguments.of(Flags().also { it.set(8) }, 256),
-            Arguments.of(Flags().also { it.setAll(0, 16) }, 65535),
+            Arguments.of(Flags().set(8), 256),
+            Arguments.of(Flags().setAll(0, 16), 65535),
         )
     }
 }
