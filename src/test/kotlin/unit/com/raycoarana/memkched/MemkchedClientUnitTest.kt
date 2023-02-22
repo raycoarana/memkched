@@ -1,5 +1,6 @@
 package com.raycoarana.memkched
 
+import com.raycoarana.memkched.api.CasUnique
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Transcoder
 import com.raycoarana.memkched.internal.Cluster
@@ -8,7 +9,7 @@ import com.raycoarana.memkched.internal.OperationConfig
 import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.SocketChannelWrapper
 import com.raycoarana.memkched.internal.result.GetResult
-import com.raycoarana.memkched.internal.result.GetResult.Value
+import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.test.StringToBytesTranscoder
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -19,6 +20,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import com.raycoarana.memkched.internal.result.GetResult.Value as GetValue
+import com.raycoarana.memkched.internal.result.GetsResult.Value as GetsValue
 
 class MemkchedClientUnitTest {
     private val channel: Channel<Operation<SocketChannelWrapper, *>> = mockk()
@@ -40,22 +43,62 @@ class MemkchedClientUnitTest {
     @Test
     @Suppress("UNCHECKED_CAST")
     fun `queue get operation and await its completion`() = runBlocking {
-        every { operationConfig.timeout } returns SOME_OP_TIMEOUT
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
         every { createOperationFactory.get(SOME_KEY) } returns
             operation as Operation<SocketChannelWrapper, GetResult<ByteArray>>
-        coEvery { channel.send(operation) } just Runs
-        val expectedResult = Value(Flags(), RESULTING_BYTE_ARRAY)
-        coEvery { operation.await(SOME_OP_TIMEOUT) } returns expectedResult
+        givenAwaitForOperationResultReturns(GetValue(Flags(), RESULTING_BYTE_ARRAY))
 
         val result = client.get(SOME_KEY, transcoder)
 
-        assertEquals(Value(Flags(), EXPECTED_RESULT), result)
+        assertEquals(GetValue(Flags(), EXPECTED_RESULT), result)
+    }
+
+    @Test
+    @Suppress("UNCHECKED_CAST")
+    fun `queue multi-get operation and await its completion`() = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every { createOperationFactory.get(listOf(SOME_KEY)) } returns
+            operation as Operation<SocketChannelWrapper, Map<String, GetResult<ByteArray>>>
+        givenAwaitForOperationResultReturns(mapOf(SOME_KEY to GetValue(Flags(), RESULTING_BYTE_ARRAY)))
+
+        val result = client.get(listOf(SOME_KEY), transcoder)
+
+        assertEquals(mapOf(SOME_KEY to GetValue(Flags(), EXPECTED_RESULT)), result)
+    }
+
+    @Test
+    @Suppress("UNCHECKED_CAST")
+    fun `queue gets operation and await its completion`() = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every { createOperationFactory.gets(SOME_KEY) } returns
+            operation as Operation<SocketChannelWrapper, GetsResult<ByteArray>>
+        givenAwaitForOperationResultReturns(GetsValue(Flags(), RESULTING_BYTE_ARRAY, SOME_CAS_UNIQUE))
+
+        val result = client.gets(SOME_KEY, transcoder)
+
+        assertEquals(GetsValue(Flags(), EXPECTED_RESULT, SOME_CAS_UNIQUE), result)
+    }
+
+    private fun givenSomeOpTimeout() {
+        every { operationConfig.timeout } returns SOME_OP_TIMEOUT
+    }
+
+    private fun givenOperationIsSentSuccessfully() {
+        coEvery { channel.send(operation) } just Runs
+    }
+
+    private fun givenAwaitForOperationResultReturns(expectedResult: Any) {
+        coEvery { operation.await(SOME_OP_TIMEOUT) } returns expectedResult
     }
 
     companion object {
         private const val SOME_KEY = "some-key"
         private const val SOME_OP_TIMEOUT = 1000L
         private const val EXPECTED_RESULT = "some-result"
+        private val SOME_CAS_UNIQUE = CasUnique(1234L)
         private val RESULTING_BYTE_ARRAY = EXPECTED_RESULT.toByteArray(Charsets.US_ASCII)
     }
 }

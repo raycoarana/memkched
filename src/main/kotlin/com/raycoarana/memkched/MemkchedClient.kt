@@ -9,6 +9,7 @@ import com.raycoarana.memkched.internal.OperationConfig
 import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.SocketChannelWrapper
 import com.raycoarana.memkched.internal.result.GetResult
+import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.SetResult
 import kotlinx.coroutines.channels.Channel
 
@@ -55,6 +56,22 @@ class MemkchedClient internal constructor(
 
         val getResultMap = operation.await(operationConfig.timeout)
         return getResultMap.mapValues { it.value.map { flags, data -> transcoder.decode(flags, data) } }
+    }
+
+    /**
+     * Memcached GETS operation of a single key
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param transcoder converter to apply to byte array data obtained from the key. Transcoder.IDENTITY will return
+     * the raw ByteArray
+     * @return GetsResult child class with the Value or NotFound
+     */
+    suspend fun <T> gets(key: String, transcoder: Transcoder<T>): GetsResult<T> {
+        val operation = createOperationFactory.gets(key)
+        channel.send(operation)
+
+        val getsResult = operation.await(operationConfig.timeout)
+        return getsResult.map { flags, data -> transcoder.decode(flags, data) }
     }
 
     suspend fun <T> set(
