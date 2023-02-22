@@ -82,6 +82,22 @@ class MemkchedClientUnitTest {
         assertEquals(GetsValue(Flags(), EXPECTED_RESULT, SOME_CAS_UNIQUE), result)
     }
 
+    @Test
+    @Suppress("UNCHECKED_CAST")
+    fun `queue multi-gets operation and await its completion`() = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every { createOperationFactory.gets(listOf(SOME_KEY)) } returns
+            operation as Operation<SocketChannelWrapper, Map<String, GetsResult<ByteArray>>>
+        givenAwaitForOperationResultReturns(
+            mapOf(SOME_KEY to GetsValue(Flags(), RESULTING_BYTE_ARRAY, SOME_CAS_UNIQUE))
+        )
+
+        val result = client.gets(listOf(SOME_KEY), transcoder)
+
+        assertEquals(mapOf(SOME_KEY to GetsValue(Flags(), EXPECTED_RESULT, SOME_CAS_UNIQUE)), result)
+    }
+
     private fun givenSomeOpTimeout() {
         every { operationConfig.timeout } returns SOME_OP_TIMEOUT
     }

@@ -6,14 +6,6 @@ import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
 
 /***
- * gets <key>*\r\n
- *
- * @param keys a list of keys, each maximum of 250 characters key, must not include control characters or whitespaces
- */
-internal fun gets(keys: List<String>): String =
-    keys.joinToString(separator = " ", prefix = "gets ", postfix = "$EOL")
-
-/***
  * gat <exptime> <key>*\r\n
  *
  * @param key a maximum of 250 characters key, must not include control characters or whitespaces
