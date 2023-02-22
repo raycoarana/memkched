@@ -17,16 +17,14 @@ import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.TouchResult
 import com.raycoarana.memkched.internal.text.operation.GetOperation
+import com.raycoarana.memkched.internal.text.operation.GetsOperation
 import com.raycoarana.memkched.internal.text.operation.MultiGetOperation
 import com.raycoarana.memkched.internal.text.operation.SetOperation
 
 internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannelWrapper> {
     override fun get(key: String) = GetOperation(key)
     override fun get(keys: List<String>) = MultiGetOperation(keys)
-
-    override fun gets(key: String): Operation<TextProtocolSocketChannelWrapper, GetsResult<ByteArray>> {
-        TODO("Not yet implemented")
-    }
+    override fun gets(key: String) = GetsOperation(key)
 
     override fun gets(
         keys: List<String>
