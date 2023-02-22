@@ -22,6 +22,10 @@ internal open class BaseOperationUnitTest<T : Any> {
         coEvery { socketChannel.writeLine(line) } just Runs
     }
 
+    protected fun expectWrittenBinaryBlock(byteArray: ByteArray) {
+        coEvery { socketChannel.writeBinary(byteArray) } just Runs
+    }
+
     protected fun givenReadLineReturns(vararg readLineResult: String) {
         coEvery { socketChannel.readLine() } returnsMany readLineResult.toList()
     }

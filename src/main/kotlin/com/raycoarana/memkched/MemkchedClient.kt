@@ -91,6 +91,17 @@ class MemkchedClient internal constructor(
         return getsResultMap.mapValues { it.value.map { flags, data -> transcoder.decode(flags, data) } }
     }
 
+    /***
+     * Memcached SET operation to store a value
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param value value to store
+     * @param transcoder transcoder to use to conver the value into an array of bytes
+     * @param expiration expiration time of the item
+     * @param flags 16-bits flags stored with the value
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a SetResult child class with the result of the operation as Stored or NoReply in case NoReply were requested
+     */
     suspend fun <T> set(
         key: String,
         value: T,
