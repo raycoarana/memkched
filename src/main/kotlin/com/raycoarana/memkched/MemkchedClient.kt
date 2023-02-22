@@ -40,6 +40,23 @@ class MemkchedClient internal constructor(
         return getResult.map { flags, data -> transcoder.decode(flags, data) }
     }
 
+    /**
+     * Memcached GET operation of a set keys
+     *
+     * @param keys a list of keys, each having a maximum of 250 characters, must not include control characters or
+     * whitespaces
+     * @param transcoder converter to apply to byte array data obtained from each key. Transcoder.IDENTITY will return
+     * the raw ByteArray, allowing to get heterogeneous data.
+     * @return a Map of GetResult child classes with the Value or NotFound, indexed by its key
+     */
+    suspend fun <T> get(keys: List<String>, transcoder: Transcoder<T>): Map<String, GetResult<T>> {
+        val operation = createOperationFactory.get(keys)
+        channel.send(operation)
+
+        val getResultMap = operation.await(operationConfig.timeout)
+        return getResultMap.mapValues { it.value.map { flags, data -> transcoder.decode(flags, data) } }
+    }
+
     suspend fun <T> set(
         key: String,
         value: T,

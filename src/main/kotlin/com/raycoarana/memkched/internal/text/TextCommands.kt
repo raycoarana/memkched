@@ -6,14 +6,6 @@ import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
 
 /***
- * get <key>*\r\n
- *
- * @param keys a maximum of 250 characters key, must not include control characters or whitespaces
- */
-internal fun get(keys: List<String>): String =
-    keys.joinToString(separator = " ", prefix = "get ", postfix = "$EOL")
-
-/***
  * gets <key>*\r\n
  *
  * @param key a maximum of 250 characters key, must not include control characters or whitespaces

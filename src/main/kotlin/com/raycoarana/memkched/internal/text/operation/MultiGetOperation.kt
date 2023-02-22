@@ -13,6 +13,10 @@ internal class MultiGetOperation(
     override suspend fun run(
         socketChannelWrapper: TextProtocolSocketChannelWrapper
     ): Map<String, GetResult<ByteArray>> {
+        if (keys.isEmpty()) {
+            return emptyMap()
+        }
+
         val cmd = keys.joinToString(separator = " ", prefix = "get ")
         socketChannelWrapper.writeLine(cmd)
         var endLineCandidate = socketChannelWrapper.readLine()

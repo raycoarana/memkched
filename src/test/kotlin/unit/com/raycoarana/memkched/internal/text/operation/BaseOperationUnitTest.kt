@@ -9,11 +9,14 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotlin.test.assertEquals
 
-internal open class BaseOperationUnitTest<T : Any>(
-    private val operation: Operation<TextProtocolSocketChannelWrapper, T>
-) {
+internal open class BaseOperationUnitTest<T : Any> {
     private val socketChannel: TextProtocolSocketChannelWrapper = mockk()
+    private lateinit var operation: Operation<TextProtocolSocketChannelWrapper, T>
     private lateinit var result: T
+
+    protected fun givenOperation(value: Operation<TextProtocolSocketChannelWrapper, T>) {
+        operation = value
+    }
 
     protected fun expectWrittenLine(line: String) {
         coEvery { socketChannel.writeLine(line) } just Runs
@@ -40,5 +43,6 @@ internal open class BaseOperationUnitTest<T : Any>(
 
     companion object {
         const val SOME_KEY = "some-key"
+        const val SOME_OTHER_KEY = "some-other-key"
     }
 }
