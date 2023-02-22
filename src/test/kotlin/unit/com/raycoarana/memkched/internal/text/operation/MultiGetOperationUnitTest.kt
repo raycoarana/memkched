@@ -4,7 +4,6 @@ import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetResult.NotFound
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 internal class MultiGetOperationUnitTest : BaseOperationUnitTest<Map<String, GetResult<ByteArray>>>() {
     @Test
