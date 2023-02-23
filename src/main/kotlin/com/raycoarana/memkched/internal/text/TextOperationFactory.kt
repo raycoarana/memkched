@@ -61,23 +61,23 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         flags: Flags,
         expiration: Expiration,
         data: ByteArray,
-        replay: Reply
-    ) = SetOperation(key, flags, expiration, data, replay)
+        reply: Reply
+    ) = SetOperation(key, flags, expiration, data, reply)
 
     override fun add(
         key: String,
         flags: Flags,
         expiration: Expiration,
         data: ByteArray,
-        replay: Reply
-    ) = AddOperation(key, flags, expiration, data, replay)
+        reply: Reply
+    ) = AddOperation(key, flags, expiration, data, reply)
 
     override fun replace(
         key: String,
         flags: Flags,
         expiration: Expiration,
         data: ByteArray,
-        replay: Reply
+        reply: Reply
     ): Operation<TextProtocolSocketChannelWrapper, AddReplaceResult> {
         TODO("Not yet implemented")
     }
@@ -85,7 +85,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
     override fun append(
         key: String,
         data: ByteArray,
-        replay: Reply
+        reply: Reply
     ): Operation<TextProtocolSocketChannelWrapper, AppendPrependResult> {
         TODO("Not yet implemented")
     }
@@ -93,7 +93,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
     override fun prepend(
         key: String,
         data: ByteArray,
-        replay: Reply
+        reply: Reply
     ): Operation<TextProtocolSocketChannelWrapper, AppendPrependResult> {
         TODO("Not yet implemented")
     }
@@ -104,7 +104,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         expiration: Expiration,
         data: ByteArray,
         casUnique: CasUnique,
-        replay: Reply
+        reply: Reply
     ): Operation<TextProtocolSocketChannelWrapper, CasResult> {
         TODO("Not yet implemented")
     }
@@ -112,7 +112,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
     override fun touch(
         key: String,
         expiration: Expiration,
-        replay: Reply
+        reply: Reply
     ): Operation<TextProtocolSocketChannelWrapper, TouchResult> {
         TODO("Not yet implemented")
     }
@@ -120,7 +120,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
     override fun incr(
         key: String,
         value: ULong,
-        replay: Reply
+        reply: Reply
     ): Operation<TextProtocolSocketChannelWrapper, IncrDecrResult> {
         TODO("Not yet implemented")
     }
@@ -128,16 +128,16 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
     override fun decr(
         key: String,
         value: ULong,
-        replay: Reply
+        reply: Reply
     ): Operation<TextProtocolSocketChannelWrapper, IncrDecrResult> {
         TODO("Not yet implemented")
     }
 
-    override fun delete(key: String, replay: Reply): Operation<TextProtocolSocketChannelWrapper, DeleteResult> {
+    override fun delete(key: String, reply: Reply): Operation<TextProtocolSocketChannelWrapper, DeleteResult> {
         TODO("Not yet implemented")
     }
 
-    override fun flushAll(replay: Reply): Operation<TextProtocolSocketChannelWrapper, FlushAllResult> {
+    override fun flushAll(reply: Reply): Operation<TextProtocolSocketChannelWrapper, FlushAllResult> {
         TODO("Not yet implemented")
     }
 }

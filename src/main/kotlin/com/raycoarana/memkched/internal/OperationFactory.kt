@@ -34,31 +34,31 @@ internal interface OperationFactory<T : SocketChannelWrapper> {
         flags: Flags,
         expiration: Expiration,
         data: ByteArray,
-        replay: Reply = Reply.DEFAULT
+        reply: Reply = Reply.DEFAULT
     ): Operation<T, SetResult>
     fun add(
         key: String,
         flags: Flags,
         expiration: Expiration,
         data: ByteArray,
-        replay: Reply = Reply.DEFAULT
+        reply: Reply = Reply.DEFAULT
     ): Operation<T, AddReplaceResult>
     fun replace(
         key: String,
         flags: Flags,
         expiration: Expiration,
         data: ByteArray,
-        replay: Reply = Reply.DEFAULT
+        reply: Reply = Reply.DEFAULT
     ): Operation<T, AddReplaceResult>
     fun append(
         key: String,
         data: ByteArray,
-        replay: Reply = Reply.DEFAULT
+        reply: Reply = Reply.DEFAULT
     ): Operation<T, AppendPrependResult>
     fun prepend(
         key: String,
         data: ByteArray,
-        replay: Reply = Reply.DEFAULT
+        reply: Reply = Reply.DEFAULT
     ): Operation<T, AppendPrependResult>
     fun cas(
         key: String,
@@ -66,11 +66,11 @@ internal interface OperationFactory<T : SocketChannelWrapper> {
         expiration: Expiration,
         data: ByteArray,
         casUnique: CasUnique,
-        replay: Reply = Reply.DEFAULT
+        reply: Reply = Reply.DEFAULT
     ): Operation<T, CasResult>
-    fun touch(key: String, expiration: Expiration, replay: Reply = Reply.DEFAULT): Operation<T, TouchResult>
-    fun incr(key: String, value: ULong, replay: Reply = Reply.DEFAULT): Operation<T, IncrDecrResult>
-    fun decr(key: String, value: ULong, replay: Reply = Reply.DEFAULT): Operation<T, IncrDecrResult>
-    fun delete(key: String, replay: Reply = Reply.DEFAULT): Operation<T, DeleteResult>
-    fun flushAll(replay: Reply = Reply.DEFAULT): Operation<T, FlushAllResult>
+    fun touch(key: String, expiration: Expiration, reply: Reply = Reply.DEFAULT): Operation<T, TouchResult>
+    fun incr(key: String, value: ULong, reply: Reply = Reply.DEFAULT): Operation<T, IncrDecrResult>
+    fun decr(key: String, value: ULong, reply: Reply = Reply.DEFAULT): Operation<T, IncrDecrResult>
+    fun delete(key: String, reply: Reply = Reply.DEFAULT): Operation<T, DeleteResult>
+    fun flushAll(reply: Reply = Reply.DEFAULT): Operation<T, FlushAllResult>
 }

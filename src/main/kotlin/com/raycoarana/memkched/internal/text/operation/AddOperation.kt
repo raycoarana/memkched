@@ -15,14 +15,14 @@ internal class AddOperation(
     private val flags: Flags,
     private val expiration: Expiration,
     private val data: ByteArray,
-    private val replay: Reply
+    private val reply: Reply
 ) : Operation<TextProtocolSocketChannelWrapper, AddReplaceResult>() {
     override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): AddReplaceResult {
-        val cmd = "add $key ${flags.toUShort()} ${expiration.value} ${data.size}${replay.asTextCommandValue()}"
+        val cmd = "add $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
         socketChannelWrapper.writeLine(cmd)
         socketChannelWrapper.writeBinary(data)
 
-        if (replay == Reply.NO_REPLY) {
+        if (reply == Reply.NO_REPLY) {
             return AddReplaceResult.NoReply
         }
 

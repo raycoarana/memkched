@@ -12,7 +12,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class SetOperationUnitTest : BaseOperationUnitTest<SetResult>() {
     @Test
-    fun `set key with replay when value is stored`() {
+    fun `set key with reply when value is stored`() {
         givenOperation(SetOperation(SOME_KEY, Flags(), Relative(100), DATA_BLOCK, Reply.DEFAULT))
         expectWrittenLine("set $SOME_KEY 0 100 5")
         expectWrittenBinaryBlock(DATA_BLOCK)
@@ -24,7 +24,7 @@ internal class SetOperationUnitTest : BaseOperationUnitTest<SetResult>() {
     }
 
     @Test
-    fun `set key with replay when value is error`() {
+    fun `set key with reply when value is error`() {
         givenOperation(SetOperation(SOME_KEY, Flags(), Relative(100), DATA_BLOCK, Reply.DEFAULT))
         expectWrittenLine("set $SOME_KEY 0 100 5")
         expectWrittenBinaryBlock(DATA_BLOCK)
@@ -36,7 +36,7 @@ internal class SetOperationUnitTest : BaseOperationUnitTest<SetResult>() {
     }
 
     @Test
-    fun `set key with no-replay when value is stored`() {
+    fun `set key with no-reply when value is stored`() {
         givenOperation(SetOperation(SOME_KEY, Flags(), Relative(100), DATA_BLOCK, Reply.NO_REPLY))
         expectWrittenLine("set $SOME_KEY 0 100 5 noreply")
         expectWrittenBinaryBlock(DATA_BLOCK)
