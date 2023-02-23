@@ -169,6 +169,21 @@ class MemkchedClientUnitTest {
         assertEquals(AppendPrependStored, result)
     }
 
+    @ParameterizedTest
+    @MethodSource("replyProvider")
+    @Suppress("UNCHECKED_CAST")
+    fun `queue prepend operation and await its completion`(reply: Reply) = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every { createOperationFactory.prepend(SOME_KEY, BYTE_ARRAY, reply) } returns
+            operation as Operation<SocketChannelWrapper, AppendPrependResult>
+        givenAwaitForOperationResultReturns(AppendPrependStored)
+
+        val result = client.prepend(SOME_KEY, ORIGINAL_DATA, transcoder, reply)
+
+        assertEquals(AppendPrependStored, result)
+    }
+
     private fun givenSomeOpTimeout() {
         every { operationConfig.timeout } returns SOME_OP_TIMEOUT
     }

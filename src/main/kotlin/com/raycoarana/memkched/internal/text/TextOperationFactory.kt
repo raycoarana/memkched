@@ -6,7 +6,6 @@ import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
 import com.raycoarana.memkched.internal.Operation
 import com.raycoarana.memkched.internal.OperationFactory
-import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.DeleteResult
 import com.raycoarana.memkched.internal.result.FlushAllResult
@@ -20,6 +19,7 @@ import com.raycoarana.memkched.internal.text.operation.GetOperation
 import com.raycoarana.memkched.internal.text.operation.GetsOperation
 import com.raycoarana.memkched.internal.text.operation.MultiGetOperation
 import com.raycoarana.memkched.internal.text.operation.MultiGetsOperation
+import com.raycoarana.memkched.internal.text.operation.PrependOperation
 import com.raycoarana.memkched.internal.text.operation.ReplaceOperation
 import com.raycoarana.memkched.internal.text.operation.SetOperation
 
@@ -82,14 +82,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
     ) = ReplaceOperation(key, flags, expiration, data, reply)
 
     override fun append(key: String, data: ByteArray, reply: Reply) = AppendOperation(key, data, reply)
-
-    override fun prepend(
-        key: String,
-        data: ByteArray,
-        reply: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, AppendPrependResult> {
-        TODO("Not yet implemented")
-    }
+    override fun prepend(key: String, data: ByteArray, reply: Reply) = PrependOperation(key, data, reply)
 
     override fun cas(
         key: String,
