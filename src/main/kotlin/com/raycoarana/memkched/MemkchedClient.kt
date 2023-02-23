@@ -145,4 +145,31 @@ class MemkchedClient internal constructor(
 
         return operation.await(operationConfig.timeout)
     }
+
+    /***
+     * Memcached REPLACE operation to store a value only if it exists already
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param value value to store
+     * @param transcoder transcoder to use to conver the value into an array of bytes
+     * @param expiration expiration time of the item
+     * @param flags 16-bits flags stored with the value
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a AddReplaceResult child class with the result of the operation as Stored/NotStored or NoReply in case
+     * NoReply were requested
+     */
+    suspend fun <T> replace(
+        key: String,
+        value: T,
+        transcoder: Transcoder<T>,
+        expiration: Expiration,
+        flags: Flags = Flags(),
+        reply: Reply = Reply.DEFAULT
+    ): AddReplaceResult {
+        val data = transcoder.encode(value)
+        val operation = createOperationFactory.replace(key, flags, expiration, data, reply)
+        channel.send(operation)
+
+        return operation.await(operationConfig.timeout)
+    }
 }
