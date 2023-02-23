@@ -10,10 +10,10 @@ import com.raycoarana.memkched.internal.Operation
 import com.raycoarana.memkched.internal.OperationConfig
 import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.SocketChannelWrapper
+import com.raycoarana.memkched.internal.result.AddReplaceResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.SetResult
-import com.raycoarana.memkched.internal.result.SetResult.Stored
 import com.raycoarana.memkched.test.StringToBytesTranscoder
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -27,8 +27,10 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import kotlin.test.assertEquals
+import com.raycoarana.memkched.internal.result.AddReplaceResult.Stored as AddReplaceStored
 import com.raycoarana.memkched.internal.result.GetResult.Value as GetValue
 import com.raycoarana.memkched.internal.result.GetsResult.Value as GetsValue
+import com.raycoarana.memkched.internal.result.SetResult.Stored as SetStored
 
 class MemkchedClientUnitTest {
     private val channel: Channel<Operation<SocketChannelWrapper, *>> = mockk()
@@ -112,12 +114,27 @@ class MemkchedClientUnitTest {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
         every { createOperationFactory.set(SOME_KEY, Flags(), Relative(100), BYTE_ARRAY, reply) } returns
-                operation as Operation<SocketChannelWrapper, SetResult>
-        givenAwaitForOperationResultReturns(Stored)
+            operation as Operation<SocketChannelWrapper, SetResult>
+        givenAwaitForOperationResultReturns(SetStored)
 
         val result = client.set(SOME_KEY, ORIGINAL_DATA, transcoder, Relative(100), Flags(), reply)
 
-        assertEquals(Stored, result)
+        assertEquals(SetStored, result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("replyProvider")
+    @Suppress("UNCHECKED_CAST")
+    fun `queue add operation and await its completion`(reply: Reply) = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every { createOperationFactory.add(SOME_KEY, Flags(), Relative(100), BYTE_ARRAY, reply) } returns
+            operation as Operation<SocketChannelWrapper, AddReplaceResult>
+        givenAwaitForOperationResultReturns(AddReplaceStored)
+
+        val result = client.add(SOME_KEY, ORIGINAL_DATA, transcoder, Relative(100), Flags(), reply)
+
+        assertEquals(AddReplaceStored, result)
     }
 
     private fun givenSomeOpTimeout() {
