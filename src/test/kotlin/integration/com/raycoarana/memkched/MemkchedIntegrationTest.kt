@@ -65,4 +65,28 @@ class MemkchedIntegrationTest {
             assertEquals(GetResult.Value(Flags(), "HELLOsome-data"), getResultAfterAppend)
         }
     }
+
+    @Test
+    fun testPrependE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val prependResult = client.prepend("some-key", "some-data", StringToBytesTranscoder)
+            assertEquals(AppendPrependResult.NotStored, prependResult)
+
+            val result = client.set("some-key", "HELLO", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val prependAfterSetResult = client.prepend("some-key", "some-data", StringToBytesTranscoder)
+            assertEquals(AppendPrependResult.Stored, prependAfterSetResult)
+
+            val getResultAfterAppend = client.get("some-key", StringToBytesTranscoder)
+            assertEquals(GetResult.Value(Flags(), "some-dataHELLO"), getResultAfterAppend)
+        }
+    }
 }

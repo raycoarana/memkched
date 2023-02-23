@@ -196,4 +196,27 @@ class MemkchedClient internal constructor(
 
         return operation.await(operationConfig.timeout)
     }
+
+    /***
+     * Memcached PREPEND operation to prepend data to existing data
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param value value to store
+     * @param transcoder transcoder to use to conver the value into an array of bytes
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a AppendPrependResult child class with the result of the operation as Stored or NoReply in case NoReply
+     * were requested
+     */
+    suspend fun <T> prepend(
+        key: String,
+        value: T,
+        transcoder: Transcoder<T>,
+        reply: Reply = Reply.DEFAULT
+    ): AppendPrependResult {
+        val data = transcoder.encode(value)
+        val operation = createOperationFactory.prepend(key, data, reply)
+        channel.send(operation)
+
+        return operation.await(operationConfig.timeout)
+    }
 }
