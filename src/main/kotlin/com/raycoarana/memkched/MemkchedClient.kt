@@ -8,6 +8,7 @@ import com.raycoarana.memkched.internal.Cluster
 import com.raycoarana.memkched.internal.OperationConfig
 import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.SocketChannelWrapper
+import com.raycoarana.memkched.internal.result.AddReplaceResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.SetResult
@@ -100,7 +101,8 @@ class MemkchedClient internal constructor(
      * @param expiration expiration time of the item
      * @param flags 16-bits flags stored with the value
      * @param reply optional parameter to instruct the server to not send an answer
-     * @return a SetResult child class with the result of the operation as Stored or NoReply in case NoReply were requested
+     * @return a SetResult child class with the result of the operation as Stored or NoReply in case NoReply were
+     * requested
      */
     suspend fun <T> set(
         key: String,
@@ -112,6 +114,33 @@ class MemkchedClient internal constructor(
     ): SetResult {
         val data = transcoder.encode(value)
         val operation = createOperationFactory.set(key, flags, expiration, data, reply)
+        channel.send(operation)
+
+        return operation.await(operationConfig.timeout)
+    }
+
+    /***
+     * Memcached ADD operation to store a value only if it not exists already
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param value value to store
+     * @param transcoder transcoder to use to conver the value into an array of bytes
+     * @param expiration expiration time of the item
+     * @param flags 16-bits flags stored with the value
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a AddReplaceResult child class with the result of the operation as Stored/NotStored or NoReply in case
+     * NoReply were requested
+     */
+    suspend fun <T> add(
+        key: String,
+        value: T,
+        transcoder: Transcoder<T>,
+        expiration: Expiration,
+        flags: Flags = Flags(),
+        reply: Reply = Reply.DEFAULT
+    ): AddReplaceResult {
+        val data = transcoder.encode(value)
+        val operation = createOperationFactory.add(key, flags, expiration, data, reply)
         channel.send(operation)
 
         return operation.await(operationConfig.timeout)
