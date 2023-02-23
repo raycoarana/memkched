@@ -137,6 +137,21 @@ class MemkchedClientUnitTest {
         assertEquals(AddReplaceStored, result)
     }
 
+    @ParameterizedTest
+    @MethodSource("replyProvider")
+    @Suppress("UNCHECKED_CAST")
+    fun `queue replace operation and await its completion`(reply: Reply) = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every { createOperationFactory.replace(SOME_KEY, Flags(), Relative(100), BYTE_ARRAY, reply) } returns
+            operation as Operation<SocketChannelWrapper, AddReplaceResult>
+        givenAwaitForOperationResultReturns(AddReplaceStored)
+
+        val result = client.replace(SOME_KEY, ORIGINAL_DATA, transcoder, Relative(100), Flags(), reply)
+
+        assertEquals(AddReplaceStored, result)
+    }
+
     private fun givenSomeOpTimeout() {
         every { operationConfig.timeout } returns SOME_OP_TIMEOUT
     }
