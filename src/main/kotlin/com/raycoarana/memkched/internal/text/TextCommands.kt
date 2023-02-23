@@ -42,24 +42,6 @@ internal fun gats(keys: List<String>, expiration: Expiration): String =
     keys.joinToString(separator = " ", prefix = "gats ${expiration.value} ", postfix = "$EOL")
 
 /***
- * append <key> <flags> <exptime> <bytes> [noreply]\r\n
- *
- * @param key a maximum of 250 characters key, must not include control characters or whitespaces
- * @param flags 16-bits flags
- * @param expiration expiration time of the item
- * @param dataSize number of bytes of data to set
- * @param reply optional parameter to instruct the server to not send an answer
- */
-internal fun append(
-    key: String,
-    flags: Flags,
-    expiration: Expiration,
-    dataSize: Int,
-    reply: Reply = Reply.DEFAULT
-): String =
-    "append $key ${flags.toUShort()} ${expiration.value} $dataSize${reply.asTextCommandValue()}$EOL"
-
-/***
  * prepend <key> <flags> <exptime> <bytes> [noreply]\r\n
  *
  * @param key a maximum of 250 characters key, must not include control characters or whitespaces

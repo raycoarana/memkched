@@ -2,6 +2,7 @@ package com.raycoarana.memkched
 
 import com.raycoarana.memkched.api.Expiration.Relative
 import com.raycoarana.memkched.api.Flags
+import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.test.Containers
@@ -38,6 +39,30 @@ class MemkchedIntegrationTest {
 
             val getResultAfterSet = client.get("some-key", StringToBytesTranscoder)
             assertEquals(GetResult.Value(Flags(), "some-data"), getResultAfterSet)
+        }
+    }
+
+    @Test
+    fun testAppendE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val appendResult = client.append("some-key", "some-data", StringToBytesTranscoder)
+            assertEquals(AppendPrependResult.NotStored, appendResult)
+
+            val result = client.set("some-key", "HELLO", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val appendAfterSetResult = client.append("some-key", "some-data", StringToBytesTranscoder)
+            assertEquals(AppendPrependResult.Stored, appendAfterSetResult)
+
+            val getResultAfterAppend = client.get("some-key", StringToBytesTranscoder)
+            assertEquals(GetResult.Value(Flags(), "HELLOsome-data"), getResultAfterAppend)
         }
     }
 }

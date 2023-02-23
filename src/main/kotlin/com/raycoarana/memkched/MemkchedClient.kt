@@ -9,6 +9,7 @@ import com.raycoarana.memkched.internal.OperationConfig
 import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.SocketChannelWrapper
 import com.raycoarana.memkched.internal.result.AddReplaceResult
+import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.SetResult
@@ -168,6 +169,29 @@ class MemkchedClient internal constructor(
     ): AddReplaceResult {
         val data = transcoder.encode(value)
         val operation = createOperationFactory.replace(key, flags, expiration, data, reply)
+        channel.send(operation)
+
+        return operation.await(operationConfig.timeout)
+    }
+
+    /***
+     * Memcached APPEND operation to append data to existing data
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param value value to store
+     * @param transcoder transcoder to use to conver the value into an array of bytes
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a AppendPrependResult child class with the result of the operation as Stored or NoReply in case NoReply
+     * were requested
+     */
+    suspend fun <T> append(
+        key: String,
+        value: T,
+        transcoder: Transcoder<T>,
+        reply: Reply = Reply.DEFAULT
+    ): AppendPrependResult {
+        val data = transcoder.encode(value)
+        val operation = createOperationFactory.append(key, data, reply)
         channel.send(operation)
 
         return operation.await(operationConfig.timeout)

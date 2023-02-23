@@ -15,6 +15,7 @@ import com.raycoarana.memkched.internal.result.GatsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.TouchResult
 import com.raycoarana.memkched.internal.text.operation.AddOperation
+import com.raycoarana.memkched.internal.text.operation.AppendOperation
 import com.raycoarana.memkched.internal.text.operation.GetOperation
 import com.raycoarana.memkched.internal.text.operation.GetsOperation
 import com.raycoarana.memkched.internal.text.operation.MultiGetOperation
@@ -80,13 +81,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         reply: Reply
     ) = ReplaceOperation(key, flags, expiration, data, reply)
 
-    override fun append(
-        key: String,
-        data: ByteArray,
-        reply: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, AppendPrependResult> {
-        TODO("Not yet implemented")
-    }
+    override fun append(key: String, data: ByteArray, reply: Reply) = AppendOperation(key, data, reply)
 
     override fun prepend(
         key: String,
