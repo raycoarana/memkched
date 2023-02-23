@@ -42,26 +42,6 @@ internal fun gats(keys: List<String>, expiration: Expiration): String =
     keys.joinToString(separator = " ", prefix = "gats ${expiration.value} ", postfix = "$EOL")
 
 /***
- * cas <key> <flags> <exptime> <bytes> <cas unique> [noreply]\r\n
- *
- * @param key a maximum of 250 characters key, must not include control characters or whitespaces
- * @param flags 16-bits flags
- * @param expiration expiration time of the item
- * @param dataSize number of bytes of data to set
- * @param casUnique unique 64-bits value of the existing item
- * @param reply optional parameter to instruct the server to not send an answer
- */
-internal fun cas(
-    key: String,
-    flags: Flags,
-    expiration: Expiration,
-    dataSize: Int,
-    casUnique: CasUnique,
-    reply: Reply = Reply.DEFAULT
-): String =
-    "cas $key ${flags.toUShort()} ${expiration.value} $dataSize ${casUnique.value}${reply.asTextCommandValue()}$EOL"
-
-/***
  * touch <key> <exptime> [noreply]\r\n
  *
  * @param key a maximum of 250 characters key, must not include control characters or whitespaces
