@@ -1,5 +1,6 @@
 package com.raycoarana.memkched
 
+import com.raycoarana.memkched.api.CasUnique
 import com.raycoarana.memkched.api.Expiration
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
@@ -10,6 +11,7 @@ import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.SocketChannelWrapper
 import com.raycoarana.memkched.internal.result.AddReplaceResult
 import com.raycoarana.memkched.internal.result.AppendPrependResult
+import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.SetResult
@@ -98,7 +100,7 @@ class MemkchedClient internal constructor(
      *
      * @param key a maximum of 250 characters key, must not include control characters or whitespaces
      * @param value value to store
-     * @param transcoder transcoder to use to conver the value into an array of bytes
+     * @param transcoder transcoder to use to convert the value into an array of bytes
      * @param expiration expiration time of the item
      * @param flags 16-bits flags stored with the value
      * @param reply optional parameter to instruct the server to not send an answer
@@ -125,7 +127,7 @@ class MemkchedClient internal constructor(
      *
      * @param key a maximum of 250 characters key, must not include control characters or whitespaces
      * @param value value to store
-     * @param transcoder transcoder to use to conver the value into an array of bytes
+     * @param transcoder transcoder to use to convert the value into an array of bytes
      * @param expiration expiration time of the item
      * @param flags 16-bits flags stored with the value
      * @param reply optional parameter to instruct the server to not send an answer
@@ -152,7 +154,7 @@ class MemkchedClient internal constructor(
      *
      * @param key a maximum of 250 characters key, must not include control characters or whitespaces
      * @param value value to store
-     * @param transcoder transcoder to use to conver the value into an array of bytes
+     * @param transcoder transcoder to use to convert the value into an array of bytes
      * @param expiration expiration time of the item
      * @param flags 16-bits flags stored with the value
      * @param reply optional parameter to instruct the server to not send an answer
@@ -179,7 +181,7 @@ class MemkchedClient internal constructor(
      *
      * @param key a maximum of 250 characters key, must not include control characters or whitespaces
      * @param value value to store
-     * @param transcoder transcoder to use to conver the value into an array of bytes
+     * @param transcoder transcoder to use to convert the value into an array of bytes
      * @param reply optional parameter to instruct the server to not send an answer
      * @return a AppendPrependResult child class with the result of the operation as Stored or NoReply in case NoReply
      * were requested
@@ -202,7 +204,7 @@ class MemkchedClient internal constructor(
      *
      * @param key a maximum of 250 characters key, must not include control characters or whitespaces
      * @param value value to store
-     * @param transcoder transcoder to use to conver the value into an array of bytes
+     * @param transcoder transcoder to use to convert the value into an array of bytes
      * @param reply optional parameter to instruct the server to not send an answer
      * @return a AppendPrependResult child class with the result of the operation as Stored or NoReply in case NoReply
      * were requested
@@ -215,6 +217,35 @@ class MemkchedClient internal constructor(
     ): AppendPrependResult {
         val data = transcoder.encode(value)
         val operation = createOperationFactory.prepend(key, data, reply)
+        channel.send(operation)
+
+        return operation.await(operationConfig.timeout)
+    }
+
+    /***
+     * Memcached CAS operation to store a value only if it has not been modified
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param value value to store
+     * @param transcoder transcoder to use to convert the value into an array of bytes
+     * @param expiration expiration time of the item
+     * @param casUnique unique 64-bits value of the existing item
+     * @param flags 16-bits flags stored with the value
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a SetResult child class with the result of the operation as Stored or NoReply in case NoReply were
+     * requested
+     */
+    suspend fun <T> cas(
+        key: String,
+        value: T,
+        transcoder: Transcoder<T>,
+        expiration: Expiration,
+        casUnique: CasUnique,
+        flags: Flags = Flags(),
+        reply: Reply = Reply.DEFAULT
+    ): CasResult {
+        val data = transcoder.encode(value)
+        val operation = createOperationFactory.cas(key, flags, expiration, data, casUnique, reply)
         channel.send(operation)
 
         return operation.await(operationConfig.timeout)

@@ -6,7 +6,6 @@ import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
 import com.raycoarana.memkched.internal.Operation
 import com.raycoarana.memkched.internal.OperationFactory
-import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.DeleteResult
 import com.raycoarana.memkched.internal.result.FlushAllResult
 import com.raycoarana.memkched.internal.result.GatResult
@@ -15,6 +14,7 @@ import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.TouchResult
 import com.raycoarana.memkched.internal.text.operation.AddOperation
 import com.raycoarana.memkched.internal.text.operation.AppendOperation
+import com.raycoarana.memkched.internal.text.operation.CasOperation
 import com.raycoarana.memkched.internal.text.operation.GetOperation
 import com.raycoarana.memkched.internal.text.operation.GetsOperation
 import com.raycoarana.memkched.internal.text.operation.MultiGetOperation
@@ -91,9 +91,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
         data: ByteArray,
         casUnique: CasUnique,
         reply: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, CasResult> {
-        TODO("Not yet implemented")
-    }
+    ) = CasOperation(key, flags, expiration, data, casUnique, reply)
 
     override fun touch(
         key: String,

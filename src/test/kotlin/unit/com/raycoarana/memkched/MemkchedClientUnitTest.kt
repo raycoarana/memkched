@@ -12,6 +12,7 @@ import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.SocketChannelWrapper
 import com.raycoarana.memkched.internal.result.AddReplaceResult
 import com.raycoarana.memkched.internal.result.AppendPrependResult
+import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.SetResult
@@ -30,6 +31,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import kotlin.test.assertEquals
 import com.raycoarana.memkched.internal.result.AddReplaceResult.Stored as AddReplaceStored
 import com.raycoarana.memkched.internal.result.AppendPrependResult.Stored as AppendPrependStored
+import com.raycoarana.memkched.internal.result.CasResult.Stored as CasStored
 import com.raycoarana.memkched.internal.result.GetResult.Value as GetValue
 import com.raycoarana.memkched.internal.result.GetsResult.Value as GetsValue
 import com.raycoarana.memkched.internal.result.SetResult.Stored as SetStored
@@ -182,6 +184,23 @@ class MemkchedClientUnitTest {
         val result = client.prepend(SOME_KEY, ORIGINAL_DATA, transcoder, reply)
 
         assertEquals(AppendPrependStored, result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("replyProvider")
+    @Suppress("UNCHECKED_CAST")
+    fun `queue cas operation and await its completion`(reply: Reply) = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every {
+            createOperationFactory.cas(SOME_KEY, Flags(), Relative(100), BYTE_ARRAY, CasUnique(123), reply)
+        } returns operation as Operation<SocketChannelWrapper, CasResult>
+        givenAwaitForOperationResultReturns(CasStored)
+
+        val result =
+            client.cas(SOME_KEY, ORIGINAL_DATA, transcoder, Relative(100), CasUnique(123), Flags(), reply)
+
+        assertEquals(CasStored, result)
     }
 
     private fun givenSomeOpTimeout() {

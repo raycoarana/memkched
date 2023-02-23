@@ -1,9 +1,12 @@
 package com.raycoarana.memkched
 
+import com.raycoarana.memkched.api.CasUnique
 import com.raycoarana.memkched.api.Expiration.Relative
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.internal.result.AppendPrependResult
+import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.GetResult
+import com.raycoarana.memkched.internal.result.GetsResult.Value
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.test.Containers
 import com.raycoarana.memkched.test.StringToBytesTranscoder
@@ -87,6 +90,39 @@ class MemkchedIntegrationTest {
 
             val getResultAfterAppend = client.get("some-key", StringToBytesTranscoder)
             assertEquals(GetResult.Value(Flags(), "some-dataHELLO"), getResultAfterAppend)
+        }
+    }
+
+    @Test
+    fun testCasE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val casResult =
+                client.cas("some-key", "some-data", StringToBytesTranscoder, Relative(100), CasUnique(123))
+            assertEquals(CasResult.NotFound, casResult)
+
+            val result = client.set("some-key", "HELLO", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val casUnique = when (val getsResult = client.gets("some-key", StringToBytesTranscoder)) {
+                is Value -> getsResult.casUnique
+                else -> error("Unexpected response")
+            }
+
+            val otherCasUnique = CasUnique(casUnique.value + 1)
+            val casWithNonMatchingUniqueResult =
+                client.cas("some-key", "some-data", StringToBytesTranscoder, Relative(100), otherCasUnique)
+            assertEquals(CasResult.Exists, casWithNonMatchingUniqueResult)
+
+            val casWithMatchingUniqueResult =
+                client.cas("some-key", "some-data", StringToBytesTranscoder, Relative(100), casUnique)
+            assertEquals(CasResult.Stored, casWithMatchingUniqueResult)
         }
     }
 }
