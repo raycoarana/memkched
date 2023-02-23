@@ -1,8 +1,6 @@
 package com.raycoarana.memkched.internal.text
 
-import com.raycoarana.memkched.api.CasUnique
 import com.raycoarana.memkched.api.Expiration
-import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
 
 /***
