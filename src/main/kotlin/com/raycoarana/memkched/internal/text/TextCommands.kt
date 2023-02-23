@@ -48,16 +48,16 @@ internal fun gats(keys: List<String>, expiration: Expiration): String =
  * @param flags 16-bits flags
  * @param expiration expiration time of the item
  * @param dataSize number of bytes of data to set
- * @param replay optional parameter to instruct the server to not send an answer
+ * @param reply optional parameter to instruct the server to not send an answer
  */
 internal fun replace(
     key: String,
     flags: Flags,
     expiration: Expiration,
     dataSize: Int,
-    replay: Reply = Reply.DEFAULT
+    reply: Reply = Reply.DEFAULT
 ): String =
-    "replace $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL"
+    "replace $key ${flags.toUShort()} ${expiration.value} $dataSize${reply.asTextCommandValue()}$EOL"
 
 /***
  * append <key> <flags> <exptime> <bytes> [noreply]\r\n
@@ -66,16 +66,16 @@ internal fun replace(
  * @param flags 16-bits flags
  * @param expiration expiration time of the item
  * @param dataSize number of bytes of data to set
- * @param replay optional parameter to instruct the server to not send an answer
+ * @param reply optional parameter to instruct the server to not send an answer
  */
 internal fun append(
     key: String,
     flags: Flags,
     expiration: Expiration,
     dataSize: Int,
-    replay: Reply = Reply.DEFAULT
+    reply: Reply = Reply.DEFAULT
 ): String =
-    "append $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL"
+    "append $key ${flags.toUShort()} ${expiration.value} $dataSize${reply.asTextCommandValue()}$EOL"
 
 /***
  * prepend <key> <flags> <exptime> <bytes> [noreply]\r\n
@@ -84,16 +84,16 @@ internal fun append(
  * @param flags 16-bits flags
  * @param expiration expiration time of the item
  * @param dataSize number of bytes of data to set
- * @param replay optional parameter to instruct the server to not send an answer
+ * @param reply optional parameter to instruct the server to not send an answer
  */
 internal fun prepend(
     key: String,
     flags: Flags,
     expiration: Expiration,
     dataSize: Int,
-    replay: Reply = Reply.DEFAULT
+    reply: Reply = Reply.DEFAULT
 ): String =
-    "prepend $key ${flags.toUShort()} ${expiration.value} $dataSize${replay.asTextCommandValue()}$EOL"
+    "prepend $key ${flags.toUShort()} ${expiration.value} $dataSize${reply.asTextCommandValue()}$EOL"
 
 /***
  * cas <key> <flags> <exptime> <bytes> <cas unique> [noreply]\r\n
@@ -103,7 +103,7 @@ internal fun prepend(
  * @param expiration expiration time of the item
  * @param dataSize number of bytes of data to set
  * @param casUnique unique 64-bits value of the existing item
- * @param replay optional parameter to instruct the server to not send an answer
+ * @param reply optional parameter to instruct the server to not send an answer
  */
 internal fun cas(
     key: String,
@@ -111,53 +111,53 @@ internal fun cas(
     expiration: Expiration,
     dataSize: Int,
     casUnique: CasUnique,
-    replay: Reply = Reply.DEFAULT
+    reply: Reply = Reply.DEFAULT
 ): String =
-    "cas $key ${flags.toUShort()} ${expiration.value} $dataSize ${casUnique.value}${replay.asTextCommandValue()}$EOL"
+    "cas $key ${flags.toUShort()} ${expiration.value} $dataSize ${casUnique.value}${reply.asTextCommandValue()}$EOL"
 
 /***
  * touch <key> <exptime> [noreply]\r\n
  *
  * @param key a maximum of 250 characters key, must not include control characters or whitespaces
  * @param expiration new expiration time of the item
- * @param replay optional parameter to instruct the server to not send an answer
+ * @param reply optional parameter to instruct the server to not send an answer
  */
-internal fun touch(key: String, expiration: Expiration, replay: Reply = Reply.DEFAULT): String =
-    "touch $key ${expiration.value}${replay.asTextCommandValue()}$EOL"
+internal fun touch(key: String, expiration: Expiration, reply: Reply = Reply.DEFAULT): String =
+    "touch $key ${expiration.value}${reply.asTextCommandValue()}$EOL"
 
 /***
  * incr <key> <value> [noreply]\r\n
  *
  * @param key a maximum of 250 characters key, must not include control characters or whitespaces
  * @param value 64-bit unsigned integer to increment
- * @param replay optional parameter to instruct the server to not send an answer
+ * @param reply optional parameter to instruct the server to not send an answer
  */
-internal fun incr(key: String, value: ULong, replay: Reply = Reply.DEFAULT): String =
-    "incr $key $value${replay.asTextCommandValue()}$EOL"
+internal fun incr(key: String, value: ULong, reply: Reply = Reply.DEFAULT): String =
+    "incr $key $value${reply.asTextCommandValue()}$EOL"
 
 /***
  * decr <key> <value> [noreply]\r\n
  *
  * @param key a maximum of 250 characters key, must not include control characters or whitespaces
  * @param value 64-bit unsigned integer to increment
- * @param replay optional parameter to instruct the server to not send an answer
+ * @param reply optional parameter to instruct the server to not send an answer
  */
-internal fun decr(key: String, value: ULong, replay: Reply = Reply.DEFAULT): String =
-    "decr $key $value${replay.asTextCommandValue()}$EOL"
+internal fun decr(key: String, value: ULong, reply: Reply = Reply.DEFAULT): String =
+    "decr $key $value${reply.asTextCommandValue()}$EOL"
 
 /***
  * delete <key> [noreply]\r\n
  *
  * @param key a maximum of 250 characters key, must not include control characters or whitespaces
- * @param replay optional parameter to instruct the server to not send an answer
+ * @param reply optional parameter to instruct the server to not send an answer
  */
-internal fun delete(key: String, replay: Reply = Reply.DEFAULT): String =
-    "delete $key${replay.asTextCommandValue()}$EOL"
+internal fun delete(key: String, reply: Reply = Reply.DEFAULT): String =
+    "delete $key${reply.asTextCommandValue()}$EOL"
 
 /***
  * flush_all <key> [noreply]\r\n
  *
- * @param replay optional parameter to instruct the server to not send an answer
+ * @param reply optional parameter to instruct the server to not send an answer
  */
-internal fun flushAll(replay: Reply = Reply.DEFAULT): String =
-    "flush_all${replay.asTextCommandValue()}$EOL"
+internal fun flushAll(reply: Reply = Reply.DEFAULT): String =
+    "flush_all${reply.asTextCommandValue()}$EOL"
