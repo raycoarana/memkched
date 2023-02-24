@@ -1,7 +1,6 @@
 package com.raycoarana.memkched.test
 
 import com.raycoarana.memkched.internal.text.EOL_BYTE_ARRAY
-import com.raycoarana.memkched.internal.text.flushAll
 import com.raycoarana.memkched.test.Containers.MEMCACHED_PORT
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.testcontainers.containers.GenericContainer
@@ -42,7 +41,7 @@ class MemcachedAssertions(private val container: GenericContainer<*>) : Closeabl
     }
 
     fun flush() {
-        assertThatAfterSending(flushAll()).expectLine("OK")
+        assertThatAfterSending("flush_all").expectLine("OK")
     }
 
     class TextReceivedMatcher(
