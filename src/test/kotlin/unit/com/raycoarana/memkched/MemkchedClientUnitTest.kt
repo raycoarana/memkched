@@ -15,6 +15,8 @@ import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
+import com.raycoarana.memkched.internal.result.IncrDecrResult
+import com.raycoarana.memkched.internal.result.IncrDecrResult.Value
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.internal.result.TouchResult
 import com.raycoarana.memkched.internal.result.TouchResult.Touched
@@ -219,6 +221,22 @@ class MemkchedClientUnitTest {
         val result = client.touch(SOME_KEY, Relative(100), reply)
 
         assertEquals(Touched, result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("replyProvider")
+    @Suppress("UNCHECKED_CAST")
+    fun `queue icr operation and await its completion`(reply: Reply) = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every {
+            createOperationFactory.incr(SOME_KEY, 100L.toULong(), reply)
+        } returns operation as Operation<SocketChannelWrapper, IncrDecrResult>
+        givenAwaitForOperationResultReturns(Value(101.toULong()))
+
+        val result = client.incr(SOME_KEY, 100L.toULong(), reply)
+
+        assertEquals(Value(101.toULong()), result)
     }
 
     private fun givenSomeOpTimeout() {

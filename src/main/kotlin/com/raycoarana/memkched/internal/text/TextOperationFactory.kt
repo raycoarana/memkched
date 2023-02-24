@@ -16,6 +16,7 @@ import com.raycoarana.memkched.internal.text.operation.AppendOperation
 import com.raycoarana.memkched.internal.text.operation.CasOperation
 import com.raycoarana.memkched.internal.text.operation.GetOperation
 import com.raycoarana.memkched.internal.text.operation.GetsOperation
+import com.raycoarana.memkched.internal.text.operation.IncrOperation
 import com.raycoarana.memkched.internal.text.operation.MultiGetOperation
 import com.raycoarana.memkched.internal.text.operation.MultiGetsOperation
 import com.raycoarana.memkched.internal.text.operation.PrependOperation
@@ -94,14 +95,7 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
     ) = CasOperation(key, flags, expiration, data, casUnique, reply)
 
     override fun touch(key: String, expiration: Expiration, reply: Reply) = TouchOperation(key, expiration, reply)
-
-    override fun incr(
-        key: String,
-        value: ULong,
-        reply: Reply
-    ): Operation<TextProtocolSocketChannelWrapper, IncrDecrResult> {
-        TODO("Not yet implemented")
-    }
+    override fun incr(key: String, value: ULong, reply: Reply) = IncrOperation(key, value, reply)
 
     override fun decr(
         key: String,

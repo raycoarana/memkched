@@ -7,6 +7,7 @@ import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult.Value
+import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.internal.result.TouchResult
 import com.raycoarana.memkched.test.Containers
@@ -147,6 +148,37 @@ class MemkchedIntegrationTest {
             val touchExistingResult =
                 client.touch("some-key", Relative(100))
             assertEquals(TouchResult.Touched, touchExistingResult)
+        }
+    }
+
+    @Test
+    fun testIncrE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val incrNotFoundResult = client.incr("some-key")
+            assertEquals(IncrDecrResult.NotFound, incrNotFoundResult)
+
+            val result = client.set("some-key", "1", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val incrResult = client.incr("some-key")
+            assertEquals(IncrDecrResult.Value(2L.toULong()), incrResult)
+
+            val max = ULong.MAX_VALUE.toString()
+            val setMaxResult = client.set("some-key", max, StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, setMaxResult)
+
+            val getMaxResult = client.get("some-key", StringToBytesTranscoder)
+            assertEquals(ULong.MAX_VALUE, (getMaxResult as GetResult.Value).data.toULong())
+
+            val maxResult = client.incr("some-key")
+            assertEquals(IncrDecrResult.Value(0.toULong()), maxResult)
         }
     }
 }

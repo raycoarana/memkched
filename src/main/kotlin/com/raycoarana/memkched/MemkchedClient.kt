@@ -14,6 +14,7 @@ import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
+import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.internal.result.TouchResult
 import kotlinx.coroutines.channels.Channel
@@ -267,6 +268,26 @@ class MemkchedClient internal constructor(
         reply: Reply = Reply.DEFAULT
     ): TouchResult {
         val operation = createOperationFactory.touch(key, expiration, reply)
+        channel.send(operation)
+
+        return operation.await(operationConfig.timeout)
+    }
+
+    /***
+     * Memcached INCR operation to increment a value
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param expiration expiration time of the item
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a IncrDecrResult child class with the result of the operation as Value with the new value, NotFound or
+     * NoReply in case NoReply were requested
+     */
+    suspend fun incr(
+        key: String,
+        value: ULong = 1L.toULong(),
+        reply: Reply = Reply.DEFAULT
+    ): IncrDecrResult {
+        val operation = createOperationFactory.incr(key, value, reply)
         channel.send(operation)
 
         return operation.await(operationConfig.timeout)
