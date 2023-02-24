@@ -15,6 +15,7 @@ import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.SetResult
+import com.raycoarana.memkched.internal.result.TouchResult
 import kotlinx.coroutines.channels.Channel
 
 class MemkchedClient internal constructor(
@@ -246,6 +247,26 @@ class MemkchedClient internal constructor(
     ): CasResult {
         val data = transcoder.encode(value)
         val operation = createOperationFactory.cas(key, flags, expiration, data, casUnique, reply)
+        channel.send(operation)
+
+        return operation.await(operationConfig.timeout)
+    }
+
+    /***
+     * Memcached TOUCH operation to update expiration of existing value
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param expiration expiration time of the item
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a TouchResult child class with the result of the operation as Touched, NotFound or NoReply in case
+     * NoReply were requested
+     */
+    suspend fun touch(
+        key: String,
+        expiration: Expiration,
+        reply: Reply = Reply.DEFAULT
+    ): TouchResult {
+        val operation = createOperationFactory.touch(key, expiration, reply)
         channel.send(operation)
 
         return operation.await(operationConfig.timeout)

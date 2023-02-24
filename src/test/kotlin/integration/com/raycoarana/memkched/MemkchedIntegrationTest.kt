@@ -8,6 +8,7 @@ import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult.Value
 import com.raycoarana.memkched.internal.result.SetResult
+import com.raycoarana.memkched.internal.result.TouchResult
 import com.raycoarana.memkched.test.Containers
 import com.raycoarana.memkched.test.StringToBytesTranscoder
 import kotlinx.coroutines.runBlocking
@@ -123,6 +124,29 @@ class MemkchedIntegrationTest {
             val casWithMatchingUniqueResult =
                 client.cas("some-key", "some-data", StringToBytesTranscoder, Relative(100), casUnique)
             assertEquals(CasResult.Stored, casWithMatchingUniqueResult)
+        }
+    }
+
+    @Test
+    fun testTouchE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val touchResult =
+                client.touch("some-key", Relative(100))
+            assertEquals(TouchResult.NotFound, touchResult)
+
+            val result = client.set("some-key", "HELLO", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val touchExistingResult =
+                client.touch("some-key", Relative(100))
+            assertEquals(TouchResult.Touched, touchExistingResult)
         }
     }
 }

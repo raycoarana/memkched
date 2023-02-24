@@ -40,16 +40,6 @@ internal fun gats(keys: List<String>, expiration: Expiration): String =
     keys.joinToString(separator = " ", prefix = "gats ${expiration.value} ", postfix = "$EOL")
 
 /***
- * touch <key> <exptime> [noreply]\r\n
- *
- * @param key a maximum of 250 characters key, must not include control characters or whitespaces
- * @param expiration new expiration time of the item
- * @param reply optional parameter to instruct the server to not send an answer
- */
-internal fun touch(key: String, expiration: Expiration, reply: Reply = Reply.DEFAULT): String =
-    "touch $key ${expiration.value}${reply.asTextCommandValue()}$EOL"
-
-/***
  * incr <key> <value> [noreply]\r\n
  *
  * @param key a maximum of 250 characters key, must not include control characters or whitespaces

@@ -16,6 +16,8 @@ import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.SetResult
+import com.raycoarana.memkched.internal.result.TouchResult
+import com.raycoarana.memkched.internal.result.TouchResult.Touched
 import com.raycoarana.memkched.test.StringToBytesTranscoder
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -201,6 +203,22 @@ class MemkchedClientUnitTest {
             client.cas(SOME_KEY, ORIGINAL_DATA, transcoder, Relative(100), CasUnique(123), Flags(), reply)
 
         assertEquals(CasStored, result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("replyProvider")
+    @Suppress("UNCHECKED_CAST")
+    fun `queue touch operation and await its completion`(reply: Reply) = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every {
+            createOperationFactory.touch(SOME_KEY, Relative(100), reply)
+        } returns operation as Operation<SocketChannelWrapper, TouchResult>
+        givenAwaitForOperationResultReturns(Touched)
+
+        val result = client.touch(SOME_KEY, Relative(100), reply)
+
+        assertEquals(Touched, result)
     }
 
     private fun givenSomeOpTimeout() {
