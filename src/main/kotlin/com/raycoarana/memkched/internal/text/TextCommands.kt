@@ -1,7 +1,6 @@
 package com.raycoarana.memkched.internal.text
 
 import com.raycoarana.memkched.api.Expiration
-import com.raycoarana.memkched.api.Reply
 
 /***
  * gat <exptime> <key>*\r\n
