@@ -13,6 +13,8 @@ import com.raycoarana.memkched.internal.SocketChannelWrapper
 import com.raycoarana.memkched.internal.result.AddReplaceResult
 import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
+import com.raycoarana.memkched.internal.result.DeleteResult
+import com.raycoarana.memkched.internal.result.DeleteResult.Deleted
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
@@ -253,6 +255,22 @@ class MemkchedClientUnitTest {
         val result = client.decr(SOME_KEY, 100L.toULong(), reply)
 
         assertEquals(Value(101.toULong()), result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("replyProvider")
+    @Suppress("UNCHECKED_CAST")
+    fun `queue delete operation and await its completion`(reply: Reply) = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every {
+            createOperationFactory.delete(SOME_KEY, reply)
+        } returns operation as Operation<SocketChannelWrapper, DeleteResult>
+        givenAwaitForOperationResultReturns(Deleted)
+
+        val result = client.delete(SOME_KEY, reply)
+
+        assertEquals(Deleted, result)
     }
 
     private fun givenSomeOpTimeout() {

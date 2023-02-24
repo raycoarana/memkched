@@ -12,6 +12,7 @@ import com.raycoarana.memkched.internal.SocketChannelWrapper
 import com.raycoarana.memkched.internal.result.AddReplaceResult
 import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
+import com.raycoarana.memkched.internal.result.DeleteResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
@@ -308,6 +309,24 @@ class MemkchedClient internal constructor(
         reply: Reply = Reply.DEFAULT
     ): IncrDecrResult {
         val operation = createOperationFactory.decr(key, value, reply)
+        channel.send(operation)
+
+        return operation.await(operationConfig.timeout)
+    }
+
+    /***
+     * Memcached DELETE operation to delete a value
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a DeleteResult child class with the result of the operation as Deleted, NotFound or
+     * NoReply in case NoReply were requested
+     */
+    suspend fun delete(
+        key: String,
+        reply: Reply = Reply.DEFAULT
+    ): DeleteResult {
+        val operation = createOperationFactory.delete(key, reply)
         channel.send(operation)
 
         return operation.await(operationConfig.timeout)

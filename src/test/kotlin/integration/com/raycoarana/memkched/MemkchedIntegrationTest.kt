@@ -5,6 +5,7 @@ import com.raycoarana.memkched.api.Expiration.Relative
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
+import com.raycoarana.memkched.internal.result.DeleteResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult.Value
 import com.raycoarana.memkched.internal.result.IncrDecrResult
@@ -203,6 +204,27 @@ class MemkchedIntegrationTest {
 
             val minResult = client.decr("some-key")
             assertEquals(IncrDecrResult.Value(0.toULong()), minResult)
+        }
+    }
+
+    @Test
+    fun testDeleteE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val notFoundResult = client.delete("some-key")
+            assertEquals(DeleteResult.NotFound, notFoundResult)
+
+            val result = client.set("some-key", "1", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val deleteResult = client.delete("some-key")
+            assertEquals(DeleteResult.Deleted, deleteResult)
         }
     }
 }

@@ -40,15 +40,6 @@ internal fun gats(keys: List<String>, expiration: Expiration): String =
     keys.joinToString(separator = " ", prefix = "gats ${expiration.value} ", postfix = "$EOL")
 
 /***
- * delete <key> [noreply]\r\n
- *
- * @param key a maximum of 250 characters key, must not include control characters or whitespaces
- * @param reply optional parameter to instruct the server to not send an answer
- */
-internal fun delete(key: String, reply: Reply = Reply.DEFAULT): String =
-    "delete $key${reply.asTextCommandValue()}$EOL"
-
-/***
  * flush_all <key> [noreply]\r\n
  *
  * @param reply optional parameter to instruct the server to not send an answer
