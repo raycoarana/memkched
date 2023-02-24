@@ -72,5 +72,5 @@ internal interface OperationFactory<T : SocketChannelWrapper> {
     fun incr(key: String, value: ULong, reply: Reply = Reply.DEFAULT): Operation<T, IncrDecrResult>
     fun decr(key: String, value: ULong, reply: Reply = Reply.DEFAULT): Operation<T, IncrDecrResult>
     fun delete(key: String, reply: Reply = Reply.DEFAULT): Operation<T, DeleteResult>
-    fun flushAll(reply: Reply = Reply.DEFAULT): Operation<T, FlushAllResult>
+    fun flushAll(expiration: Expiration?, reply: Reply = Reply.DEFAULT): Operation<T, FlushAllResult>
 }

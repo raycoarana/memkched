@@ -15,6 +15,8 @@ import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.DeleteResult
 import com.raycoarana.memkched.internal.result.DeleteResult.Deleted
+import com.raycoarana.memkched.internal.result.FlushAllResult
+import com.raycoarana.memkched.internal.result.FlushAllResult.Ok
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
@@ -271,6 +273,22 @@ class MemkchedClientUnitTest {
         val result = client.delete(SOME_KEY, reply)
 
         assertEquals(Deleted, result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("replyProvider")
+    @Suppress("UNCHECKED_CAST")
+    fun `queue flush_all operation and await its completion`(reply: Reply) = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every {
+            createOperationFactory.flushAll(null, reply)
+        } returns operation as Operation<SocketChannelWrapper, FlushAllResult>
+        givenAwaitForOperationResultReturns(Ok)
+
+        val result = client.flushAll(reply = reply)
+
+        assertEquals(Ok, result)
     }
 
     private fun givenSomeOpTimeout() {

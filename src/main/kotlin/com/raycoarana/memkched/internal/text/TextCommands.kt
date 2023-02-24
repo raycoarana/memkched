@@ -38,11 +38,3 @@ internal fun gats(key: String, expiration: Expiration): String =
  */
 internal fun gats(keys: List<String>, expiration: Expiration): String =
     keys.joinToString(separator = " ", prefix = "gats ${expiration.value} ", postfix = "$EOL")
-
-/***
- * flush_all <key> [noreply]\r\n
- *
- * @param reply optional parameter to instruct the server to not send an answer
- */
-internal fun flushAll(reply: Reply = Reply.DEFAULT): String =
-    "flush_all${reply.asTextCommandValue()}$EOL"

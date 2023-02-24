@@ -2,6 +2,7 @@ package com.raycoarana.memkched
 
 import com.raycoarana.memkched.api.CasUnique
 import com.raycoarana.memkched.api.Expiration
+import com.raycoarana.memkched.api.Expiration.Relative
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
 import com.raycoarana.memkched.api.Transcoder
@@ -13,6 +14,7 @@ import com.raycoarana.memkched.internal.result.AddReplaceResult
 import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.DeleteResult
+import com.raycoarana.memkched.internal.result.FlushAllResult
 import com.raycoarana.memkched.internal.result.GetResult
 import com.raycoarana.memkched.internal.result.GetsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
@@ -327,6 +329,26 @@ class MemkchedClient internal constructor(
         reply: Reply = Reply.DEFAULT
     ): DeleteResult {
         val operation = createOperationFactory.delete(key, reply)
+        channel.send(operation)
+
+        return operation.await(operationConfig.timeout)
+    }
+
+    /***
+     * Memcached FLUSH_ALL operation to delete the entire memcached server
+     *
+     * @param after optional expiration to wait before delete all
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a FlushAllResult child class with the result of the operation as Ok or NoReply in case NoReply were
+     * requested
+     */
+    suspend fun flushAll(
+        after: Relative? = null,
+        reply: Reply = Reply.DEFAULT
+    ): FlushAllResult {
+        val operation = createOperationFactory.flushAll(after, reply)
+
+        // FIXME #7 flushAll must indicate what worker node to flush
         channel.send(operation)
 
         return operation.await(operationConfig.timeout)

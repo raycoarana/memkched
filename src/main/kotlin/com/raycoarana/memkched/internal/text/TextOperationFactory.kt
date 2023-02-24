@@ -14,6 +14,7 @@ import com.raycoarana.memkched.internal.text.operation.AppendOperation
 import com.raycoarana.memkched.internal.text.operation.CasOperation
 import com.raycoarana.memkched.internal.text.operation.DecrOperation
 import com.raycoarana.memkched.internal.text.operation.DeleteOperation
+import com.raycoarana.memkched.internal.text.operation.FlushAllOperation
 import com.raycoarana.memkched.internal.text.operation.GetOperation
 import com.raycoarana.memkched.internal.text.operation.GetsOperation
 import com.raycoarana.memkched.internal.text.operation.IncrOperation
@@ -98,8 +99,5 @@ internal class TextOperationFactory : OperationFactory<TextProtocolSocketChannel
     override fun incr(key: String, value: ULong, reply: Reply) = IncrOperation(key, value, reply)
     override fun decr(key: String, value: ULong, reply: Reply) = DecrOperation(key, value, reply)
     override fun delete(key: String, reply: Reply) = DeleteOperation(key, reply)
-
-    override fun flushAll(reply: Reply): Operation<TextProtocolSocketChannelWrapper, FlushAllResult> {
-        TODO("Not yet implemented")
-    }
+    override fun flushAll(expiration: Expiration?, reply: Reply) = FlushAllOperation(expiration, reply)
 }
