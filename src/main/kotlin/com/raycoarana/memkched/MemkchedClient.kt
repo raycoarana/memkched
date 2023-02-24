@@ -292,4 +292,24 @@ class MemkchedClient internal constructor(
 
         return operation.await(operationConfig.timeout)
     }
+
+    /***
+     * Memcached DECR operation to increment a value
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param expiration expiration time of the item
+     * @param reply optional parameter to instruct the server to not send an answer
+     * @return a IncrDecrResult child class with the result of the operation as Value with the new value, NotFound or
+     * NoReply in case NoReply were requested
+     */
+    suspend fun decr(
+        key: String,
+        value: ULong = 1L.toULong(),
+        reply: Reply = Reply.DEFAULT
+    ): IncrDecrResult {
+        val operation = createOperationFactory.decr(key, value, reply)
+        channel.send(operation)
+
+        return operation.await(operationConfig.timeout)
+    }
 }

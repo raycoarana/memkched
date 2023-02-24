@@ -181,4 +181,28 @@ class MemkchedIntegrationTest {
             assertEquals(IncrDecrResult.Value(0.toULong()), maxResult)
         }
     }
+
+    @Test
+    fun testDecrE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val decrNotFoundResult = client.decr("some-key")
+            assertEquals(IncrDecrResult.NotFound, decrNotFoundResult)
+
+            val result = client.set("some-key", "1", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val decrResult = client.decr("some-key")
+            assertEquals(IncrDecrResult.Value(0.toULong()), decrResult)
+
+            val minResult = client.decr("some-key")
+            assertEquals(IncrDecrResult.Value(0.toULong()), minResult)
+        }
+    }
 }

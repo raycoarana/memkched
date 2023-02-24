@@ -9,11 +9,11 @@ import com.raycoarana.memkched.internal.result.IncrDecrResult.Value
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class IncrOperationUnitTest : BaseOperationUnitTest<IncrDecrResult>() {
+internal class DecrOperationUnitTest : BaseOperationUnitTest<IncrDecrResult>() {
     @Test
-    fun `incr key with reply when value exists`() {
-        givenOperation(IncrOperation(SOME_KEY, SOME_INCREMENT, Reply.DEFAULT))
-        expectWrittenLine("incr $SOME_KEY 100")
+    fun `decr key with reply when value exists`() {
+        givenOperation(DecrOperation(SOME_KEY, SOME_INCREMENT, Reply.DEFAULT))
+        expectWrittenLine("decr $SOME_KEY 100")
         givenReadLineReturns("101")
 
         whenRun()
@@ -22,9 +22,9 @@ internal class IncrOperationUnitTest : BaseOperationUnitTest<IncrDecrResult>() {
     }
 
     @Test
-    fun `incr key with reply when value does not exists`() {
-        givenOperation(IncrOperation(SOME_KEY, SOME_INCREMENT, Reply.DEFAULT))
-        expectWrittenLine("incr $SOME_KEY 100")
+    fun `decr key with reply when value does not exists`() {
+        givenOperation(DecrOperation(SOME_KEY, SOME_INCREMENT, Reply.DEFAULT))
+        expectWrittenLine("decr $SOME_KEY 100")
         givenReadLineReturns("NOT_FOUND")
 
         whenRun()
@@ -33,9 +33,9 @@ internal class IncrOperationUnitTest : BaseOperationUnitTest<IncrDecrResult>() {
     }
 
     @Test
-    fun `incr key with reply when error`() {
-        givenOperation(IncrOperation(SOME_KEY, SOME_INCREMENT, Reply.DEFAULT))
-        expectWrittenLine("incr $SOME_KEY 100")
+    fun `decr key with reply when error`() {
+        givenOperation(DecrOperation(SOME_KEY, SOME_INCREMENT, Reply.DEFAULT))
+        expectWrittenLine("decr $SOME_KEY 100")
         givenReadLineReturns("SERVER_ERROR we are full man!")
 
         assertThrows<MemcachedException>("SERVER_ERROR we are full man!") {
@@ -44,9 +44,9 @@ internal class IncrOperationUnitTest : BaseOperationUnitTest<IncrDecrResult>() {
     }
 
     @Test
-    fun `incr key with no-reply`() {
-        givenOperation(IncrOperation(SOME_KEY, SOME_INCREMENT, Reply.NO_REPLY))
-        expectWrittenLine("incr $SOME_KEY 100 noreply")
+    fun `decr key with no-reply`() {
+        givenOperation(DecrOperation(SOME_KEY, SOME_INCREMENT, Reply.NO_REPLY))
+        expectWrittenLine("decr $SOME_KEY 100 noreply")
 
         whenRun()
 

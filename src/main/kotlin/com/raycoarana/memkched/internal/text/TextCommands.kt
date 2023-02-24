@@ -40,26 +40,6 @@ internal fun gats(keys: List<String>, expiration: Expiration): String =
     keys.joinToString(separator = " ", prefix = "gats ${expiration.value} ", postfix = "$EOL")
 
 /***
- * incr <key> <value> [noreply]\r\n
- *
- * @param key a maximum of 250 characters key, must not include control characters or whitespaces
- * @param value 64-bit unsigned integer to increment
- * @param reply optional parameter to instruct the server to not send an answer
- */
-internal fun incr(key: String, value: ULong, reply: Reply = Reply.DEFAULT): String =
-    "incr $key $value${reply.asTextCommandValue()}$EOL"
-
-/***
- * decr <key> <value> [noreply]\r\n
- *
- * @param key a maximum of 250 characters key, must not include control characters or whitespaces
- * @param value 64-bit unsigned integer to increment
- * @param reply optional parameter to instruct the server to not send an answer
- */
-internal fun decr(key: String, value: ULong, reply: Reply = Reply.DEFAULT): String =
-    "decr $key $value${reply.asTextCommandValue()}$EOL"
-
-/***
  * delete <key> [noreply]\r\n
  *
  * @param key a maximum of 250 characters key, must not include control characters or whitespaces

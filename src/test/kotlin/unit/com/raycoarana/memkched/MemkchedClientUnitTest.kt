@@ -226,7 +226,7 @@ class MemkchedClientUnitTest {
     @ParameterizedTest
     @MethodSource("replyProvider")
     @Suppress("UNCHECKED_CAST")
-    fun `queue icr operation and await its completion`(reply: Reply) = runBlocking {
+    fun `queue incr operation and await its completion`(reply: Reply) = runBlocking {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
         every {
@@ -235,6 +235,22 @@ class MemkchedClientUnitTest {
         givenAwaitForOperationResultReturns(Value(101.toULong()))
 
         val result = client.incr(SOME_KEY, 100L.toULong(), reply)
+
+        assertEquals(Value(101.toULong()), result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("replyProvider")
+    @Suppress("UNCHECKED_CAST")
+    fun `queue decr operation and await its completion`(reply: Reply) = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every {
+            createOperationFactory.decr(SOME_KEY, 100L.toULong(), reply)
+        } returns operation as Operation<SocketChannelWrapper, IncrDecrResult>
+        givenAwaitForOperationResultReturns(Value(101.toULong()))
+
+        val result = client.decr(SOME_KEY, 100L.toULong(), reply)
 
         assertEquals(Value(101.toULong()), result)
     }
