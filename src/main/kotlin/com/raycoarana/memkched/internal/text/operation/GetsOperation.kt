@@ -1,16 +1,16 @@
 package com.raycoarana.memkched.internal.text.operation
 
 import com.raycoarana.memkched.internal.Operation
-import com.raycoarana.memkched.internal.result.GetsResult
+import com.raycoarana.memkched.internal.result.GetsGatsResult
 import com.raycoarana.memkched.internal.text.END
 import com.raycoarana.memkched.internal.text.TextProtocolSocketChannelWrapper
 import com.raycoarana.memkched.internal.text.parsing.ValueLine
 
-internal class GetsOperation(
+internal open class GetsOperation(
     private val key: String
-) : Operation<TextProtocolSocketChannelWrapper, GetsResult<ByteArray>>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): GetsResult<ByteArray> {
-        val cmd = "gets $key"
+) : Operation<TextProtocolSocketChannelWrapper, GetsGatsResult<ByteArray>>() {
+    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): GetsGatsResult<ByteArray> {
+        val cmd = buildCommand()
         socketChannelWrapper.writeLine(cmd)
         val result = socketChannelWrapper.readLine()
         if (result != END) {
@@ -24,8 +24,10 @@ internal class GetsOperation(
                 "Unexpected key ${valueLine.key} when requesting $key"
             }
             val casUnique = valueLine.casUnique ?: error("No CAS Unique found")
-            return GetsResult.Value(valueLine.flags, data, casUnique)
+            return GetsGatsResult.Value(valueLine.flags, data, casUnique)
         }
-        return GetsResult.NotFound
+        return GetsGatsResult.NotFound
     }
+
+    protected open fun buildCommand() = "gets $key"
 }

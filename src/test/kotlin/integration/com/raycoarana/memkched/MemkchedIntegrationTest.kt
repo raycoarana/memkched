@@ -6,8 +6,8 @@ import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.DeleteResult
-import com.raycoarana.memkched.internal.result.GetResult
-import com.raycoarana.memkched.internal.result.GetsResult.Value
+import com.raycoarana.memkched.internal.result.GetGatResult
+import com.raycoarana.memkched.internal.result.GetsGatsResult.Value
 import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.internal.result.TouchResult
@@ -28,7 +28,7 @@ class MemkchedIntegrationTest {
     private val memcached = Containers.MEMCACHED
 
     @Test
-    fun testE2E() {
+    fun testGetE2E() {
         val client = MemkchedClientBuilder()
             .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
             .operationTimeout(1, DAYS)
@@ -38,13 +38,52 @@ class MemkchedIntegrationTest {
             client.initialize()
 
             val getResult = client.get("some-key", StringToBytesTranscoder)
-            assertEquals(GetResult.NotFound, getResult)
+            assertEquals(GetGatResult.NotFound, getResult)
 
             val result = client.set("some-key", "some-data", StringToBytesTranscoder, Relative(100))
             assertEquals(SetResult.Stored, result)
 
             val getResultAfterSet = client.get("some-key", StringToBytesTranscoder)
-            assertEquals(GetResult.Value(Flags(), "some-data"), getResultAfterSet)
+            assertEquals(GetGatResult.Value(Flags(), "some-data"), getResultAfterSet)
+
+            val multiGetResult = client.get(listOf("some-key", "other-key"), StringToBytesTranscoder)
+            assertEquals(
+                mapOf(
+                    "some-key" to GetGatResult.Value(Flags(), "some-data"),
+                    "other-key" to GetGatResult.NotFound
+                ),
+                multiGetResult
+            )
+        }
+    }
+
+    @Test
+    fun testGatE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val gatResult = client.gat("some-key", Relative(100), StringToBytesTranscoder)
+            assertEquals(GetGatResult.NotFound, gatResult)
+
+            val result = client.set("some-key", "some-data", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val gatResultAfterSet = client.gat("some-key", Relative(100), StringToBytesTranscoder)
+            assertEquals(GetGatResult.Value(Flags(), "some-data"), gatResultAfterSet)
+
+            val multiGatResult = client.gat(listOf("some-key", "other-key"), Relative(100), StringToBytesTranscoder)
+            assertEquals(
+                mapOf(
+                    "some-key" to GetGatResult.Value(Flags(), "some-data"),
+                    "other-key" to GetGatResult.NotFound
+                ),
+                multiGatResult
+            )
         }
     }
 
@@ -68,7 +107,7 @@ class MemkchedIntegrationTest {
             assertEquals(AppendPrependResult.Stored, appendAfterSetResult)
 
             val getResultAfterAppend = client.get("some-key", StringToBytesTranscoder)
-            assertEquals(GetResult.Value(Flags(), "HELLOsome-data"), getResultAfterAppend)
+            assertEquals(GetGatResult.Value(Flags(), "HELLOsome-data"), getResultAfterAppend)
         }
     }
 
@@ -92,7 +131,7 @@ class MemkchedIntegrationTest {
             assertEquals(AppendPrependResult.Stored, prependAfterSetResult)
 
             val getResultAfterAppend = client.get("some-key", StringToBytesTranscoder)
-            assertEquals(GetResult.Value(Flags(), "some-dataHELLO"), getResultAfterAppend)
+            assertEquals(GetGatResult.Value(Flags(), "some-dataHELLO"), getResultAfterAppend)
         }
     }
 
@@ -176,7 +215,7 @@ class MemkchedIntegrationTest {
             assertEquals(SetResult.Stored, setMaxResult)
 
             val getMaxResult = client.get("some-key", StringToBytesTranscoder)
-            assertEquals(ULong.MAX_VALUE, (getMaxResult as GetResult.Value).data.toULong())
+            assertEquals(ULong.MAX_VALUE, (getMaxResult as GetGatResult.Value).data.toULong())
 
             val maxResult = client.incr("some-key")
             assertEquals(IncrDecrResult.Value(0.toULong()), maxResult)

@@ -9,10 +9,8 @@ import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.DeleteResult
 import com.raycoarana.memkched.internal.result.FlushAllResult
-import com.raycoarana.memkched.internal.result.GatResult
-import com.raycoarana.memkched.internal.result.GatsResult
-import com.raycoarana.memkched.internal.result.GetResult
-import com.raycoarana.memkched.internal.result.GetsResult
+import com.raycoarana.memkched.internal.result.GetGatResult
+import com.raycoarana.memkched.internal.result.GetsGatsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.internal.result.TouchResult
@@ -21,14 +19,14 @@ import com.raycoarana.memkched.internal.result.TouchResult
  * Factory interface to build the different operations
  */
 internal interface OperationFactory<T : SocketChannelWrapper> {
-    fun get(key: String): Operation<T, GetResult<ByteArray>>
-    fun get(keys: List<String>): Operation<T, Map<String, GetResult<ByteArray>>>
-    fun gets(key: String): Operation<T, GetsResult<ByteArray>>
-    fun gets(keys: List<String>): Operation<T, Map<String, GetsResult<ByteArray>>>
-    fun gat(key: String, expiration: Expiration): Operation<T, GatResult<ByteArray>>
-    fun gat(keys: List<String>, expiration: Expiration): Operation<T, Map<String, GatResult<ByteArray>>>
-    fun gats(key: String, expiration: Expiration): Operation<T, GatsResult<ByteArray>>
-    fun gats(keys: List<String>, expiration: Expiration): Operation<T, Map<String, GatsResult<ByteArray>>>
+    fun get(key: String): Operation<T, GetGatResult<ByteArray>>
+    fun get(keys: List<String>): Operation<T, Map<String, GetGatResult<ByteArray>>>
+    fun gets(key: String): Operation<T, GetsGatsResult<ByteArray>>
+    fun gets(keys: List<String>): Operation<T, Map<String, GetsGatsResult<ByteArray>>>
+    fun gat(key: String, expiration: Expiration): Operation<T, GetGatResult<ByteArray>>
+    fun gat(keys: List<String>, expiration: Expiration): Operation<T, Map<String, GetGatResult<ByteArray>>>
+    fun gats(key: String, expiration: Expiration): Operation<T, GetsGatsResult<ByteArray>>
+    fun gats(keys: List<String>, expiration: Expiration): Operation<T, Map<String, GetsGatsResult<ByteArray>>>
     fun set(
         key: String,
         flags: Flags,

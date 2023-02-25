@@ -4,12 +4,12 @@ import com.raycoarana.memkched.api.CasUnique
 import com.raycoarana.memkched.api.Flags
 import java.util.*
 
-sealed class GetsResult<T> {
+sealed class GetsGatsResult<T> {
     @Suppress("UNCHECKED_CAST")
-    open suspend fun <R> map(block: suspend (Flags, T) -> R): GetsResult<R> =
-        this as GetsResult<R>
+    open suspend fun <R> map(block: suspend (Flags, T) -> R): GetsGatsResult<R> =
+        this as GetsGatsResult<R>
 
-    data class Value<T>(val flags: Flags, val data: T, val casUnique: CasUnique) : GetsResult<T>() {
+    data class Value<T>(val flags: Flags, val data: T, val casUnique: CasUnique) : GetsGatsResult<T>() {
         override suspend fun <R> map(block: suspend (Flags, T) -> R): Value<R> =
             Value(flags, block(flags, data), casUnique)
 
@@ -39,5 +39,5 @@ sealed class GetsResult<T> {
         }
     }
 
-    object NotFound : GetsResult<ByteArray>()
+    object NotFound : GetsGatsResult<ByteArray>()
 }

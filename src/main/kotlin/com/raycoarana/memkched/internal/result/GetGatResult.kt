@@ -3,12 +3,12 @@ package com.raycoarana.memkched.internal.result
 import com.raycoarana.memkched.api.Flags
 import java.util.*
 
-sealed class GetResult<T> {
+sealed class GetGatResult<T> {
     @Suppress("UNCHECKED_CAST")
-    open suspend fun <R> map(block: suspend (Flags, T) -> R): GetResult<R> =
-        this as GetResult<R>
+    open suspend fun <R> map(block: suspend (Flags, T) -> R): GetGatResult<R> =
+        this as GetGatResult<R>
 
-    data class Value<T>(val flags: Flags, val data: T) : GetResult<T>() {
+    data class Value<T>(val flags: Flags, val data: T) : GetGatResult<T>() {
         override suspend fun <R> map(block: suspend (Flags, T) -> R): Value<R> =
             Value(flags, block(flags, data))
 
@@ -36,5 +36,5 @@ sealed class GetResult<T> {
         }
     }
 
-    object NotFound : GetResult<ByteArray>()
+    object NotFound : GetGatResult<ByteArray>()
 }

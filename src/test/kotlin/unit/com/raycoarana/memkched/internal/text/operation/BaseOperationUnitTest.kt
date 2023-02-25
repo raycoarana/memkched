@@ -1,5 +1,6 @@
 package com.raycoarana.memkched.internal.text.operation
 
+import com.raycoarana.memkched.api.Expiration.Relative
 import com.raycoarana.memkched.internal.Operation
 import com.raycoarana.memkched.internal.text.TextProtocolSocketChannelWrapper
 import io.mockk.Runs
@@ -48,5 +49,7 @@ internal open class BaseOperationUnitTest<T : Any> {
     companion object {
         const val SOME_KEY = "some-key"
         const val SOME_OTHER_KEY = "some-other-key"
+        const val SOME_EXPIRATION_VALUE = 100
+        val SOME_EXPIRATION = Relative(SOME_EXPIRATION_VALUE)
     }
 }

@@ -15,8 +15,8 @@ import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
 import com.raycoarana.memkched.internal.result.DeleteResult
 import com.raycoarana.memkched.internal.result.FlushAllResult
-import com.raycoarana.memkched.internal.result.GetResult
-import com.raycoarana.memkched.internal.result.GetsResult
+import com.raycoarana.memkched.internal.result.GetGatResult
+import com.raycoarana.memkched.internal.result.GetsGatsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.internal.result.TouchResult
@@ -42,7 +42,7 @@ class MemkchedClient internal constructor(
      * the raw ByteArray
      * @return GetResult child class with the Value or NotFound
      */
-    suspend fun <T> get(key: String, transcoder: Transcoder<T>): GetResult<T> {
+    suspend fun <T> get(key: String, transcoder: Transcoder<T>): GetGatResult<T> {
         val operation = createOperationFactory.get(key)
         channel.send(operation)
 
@@ -59,7 +59,7 @@ class MemkchedClient internal constructor(
      * the raw ByteArray, allowing to get heterogeneous data.
      * @return a Map of GetResult child classes with the Value or NotFound, indexed by its key
      */
-    suspend fun <T> get(keys: List<String>, transcoder: Transcoder<T>): Map<String, GetResult<T>> {
+    suspend fun <T> get(keys: List<String>, transcoder: Transcoder<T>): Map<String, GetGatResult<T>> {
         val operation = createOperationFactory.get(keys)
         channel.send(operation)
 
@@ -68,14 +68,14 @@ class MemkchedClient internal constructor(
     }
 
     /**
-     * Memcached GETS operation of a single key
+     * Memcached GETS operation of a single key returning its cas unique
      *
      * @param key a maximum of 250 characters key, must not include control characters or whitespaces
      * @param transcoder converter to apply to byte array data obtained from the key. Transcoder.IDENTITY will return
      * the raw ByteArray
      * @return GetsResult child class with the Value or NotFound
      */
-    suspend fun <T> gets(key: String, transcoder: Transcoder<T>): GetsResult<T> {
+    suspend fun <T> gets(key: String, transcoder: Transcoder<T>): GetsGatsResult<T> {
         val operation = createOperationFactory.gets(key)
         channel.send(operation)
 
@@ -84,7 +84,7 @@ class MemkchedClient internal constructor(
     }
 
     /**
-     * Memcached GETS operation of a set keys
+     * Memcached GETS operation of a set keys returning its cas unique
      *
      * @param keys a list of keys, each having a maximum of 250 characters, must not include control characters or
      * whitespaces
@@ -92,12 +92,90 @@ class MemkchedClient internal constructor(
      * the raw ByteArray, allowing to get heterogeneous data.
      * @return a Map of GetsResult child classes with the Value or NotFound, indexed by its key
      */
-    suspend fun <T> gets(keys: List<String>, transcoder: Transcoder<T>): Map<String, GetsResult<T>> {
+    suspend fun <T> gets(keys: List<String>, transcoder: Transcoder<T>): Map<String, GetsGatsResult<T>> {
         val operation = createOperationFactory.gets(keys)
         channel.send(operation)
 
         val getsResultMap = operation.await(operationConfig.timeout)
         return getsResultMap.mapValues { it.value.map { flags, data -> transcoder.decode(flags, data) } }
+    }
+
+    /**
+     * Memcached GAT operation that allows to get and touch a single key
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param expiration expiration time to set to item
+     * @param transcoder converter to apply to byte array data obtained from the key. Transcoder.IDENTITY will return
+     * the raw ByteArray
+     * @return GetResult child class with the Value or NotFound
+     */
+    suspend fun <T> gat(key: String, expiration: Expiration, transcoder: Transcoder<T>): GetGatResult<T> {
+        val operation = createOperationFactory.gat(key, expiration)
+        channel.send(operation)
+
+        val gatResult = operation.await(operationConfig.timeout)
+        return gatResult.map { flags, data -> transcoder.decode(flags, data) }
+    }
+
+    /**
+     * Memcached GAT operation that allows to get and touch a set keys
+     *
+     * @param keys a list of keys, each having a maximum of 250 characters, must not include control characters or
+     * whitespaces
+     * @param expiration expiration time to set to all items
+     * @param transcoder converter to apply to byte array data obtained from each key. Transcoder.IDENTITY will return
+     * the raw ByteArray, allowing to gat heterogeneous data.
+     * @return a Map of GetResult child classes with the Value or NotFound, indexed by its key
+     */
+    suspend fun <T> gat(
+        keys: List<String>,
+        expiration: Expiration,
+        transcoder: Transcoder<T>
+    ): Map<String, GetGatResult<T>> {
+        val operation = createOperationFactory.gat(keys, expiration)
+        channel.send(operation)
+
+        val gatResultMap = operation.await(operationConfig.timeout)
+        return gatResultMap.mapValues { it.value.map { flags, data -> transcoder.decode(flags, data) } }
+    }
+
+    /**
+     * Memcached GATS operation that allows to get and touch a single key returning its cas unique
+     *
+     * @param key a maximum of 250 characters key, must not include control characters or whitespaces
+     * @param expiration expiration time to set to item
+     * @param transcoder converter to apply to byte array data obtained from the key. Transcoder.IDENTITY will return
+     * the raw ByteArray
+     * @return GetsResult child class with the Value or NotFound
+     */
+    suspend fun <T> gats(key: String, expiration: Expiration, transcoder: Transcoder<T>): GetsGatsResult<T> {
+        val operation = createOperationFactory.gats(key, expiration)
+        channel.send(operation)
+
+        val gatsResult = operation.await(operationConfig.timeout)
+        return gatsResult.map { flags, data -> transcoder.decode(flags, data) }
+    }
+
+    /**
+     * Memcached GATS operation that allows to get and touch a set keys returning its cas unique
+     *
+     * @param keys a list of keys, each having a maximum of 250 characters, must not include control characters or
+     * whitespaces
+     * @param expiration expiration time to set to all items
+     * @param transcoder converter to apply to byte array data obtained from each key. Transcoder.IDENTITY will return
+     * the raw ByteArray, allowing to gat heterogeneous data.
+     * @return a Map of GetsResult child classes with the Value or NotFound, indexed by its key
+     */
+    suspend fun <T> gats(
+        keys: List<String>,
+        expiration: Expiration,
+        transcoder: Transcoder<T>
+    ): Map<String, GetsGatsResult<T>> {
+        val operation = createOperationFactory.gats(keys, expiration)
+        channel.send(operation)
+
+        val gatsResultMap = operation.await(operationConfig.timeout)
+        return gatsResultMap.mapValues { it.value.map { flags, data -> transcoder.decode(flags, data) } }
     }
 
     /***
@@ -280,7 +358,7 @@ class MemkchedClient internal constructor(
      * Memcached INCR operation to increment a value
      *
      * @param key a maximum of 250 characters key, must not include control characters or whitespaces
-     * @param expiration expiration time of the item
+     * @param value amount to increment
      * @param reply optional parameter to instruct the server to not send an answer
      * @return a IncrDecrResult child class with the result of the operation as Value with the new value, NotFound or
      * NoReply in case NoReply were requested
@@ -300,7 +378,7 @@ class MemkchedClient internal constructor(
      * Memcached DECR operation to increment a value
      *
      * @param key a maximum of 250 characters key, must not include control characters or whitespaces
-     * @param expiration expiration time of the item
+     * @param value amount to decrement
      * @param reply optional parameter to instruct the server to not send an answer
      * @return a IncrDecrResult child class with the result of the operation as Value with the new value, NotFound or
      * NoReply in case NoReply were requested

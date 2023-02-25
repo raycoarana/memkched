@@ -6,11 +6,11 @@ import com.raycoarana.memkched.internal.result.GetGatResult.NotFound
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class GetOperationUnitTest : BaseOperationUnitTest<GetGatResult<ByteArray>>() {
+internal class GatOperationUnitTest : BaseOperationUnitTest<GetGatResult<ByteArray>>() {
     @Test
-    fun `get key when value is not found`() {
-        givenOperation(GetOperation(SOME_KEY))
-        expectWrittenLine("get $SOME_KEY")
+    fun `gat key when value is not found`() {
+        givenOperation(GatOperation(SOME_KEY, SOME_EXPIRATION))
+        expectWrittenLine("gat $SOME_EXPIRATION_VALUE $SOME_KEY")
         givenReadLineReturns("END")
 
         whenRun()
@@ -19,9 +19,9 @@ internal class GetOperationUnitTest : BaseOperationUnitTest<GetGatResult<ByteArr
     }
 
     @Test
-    fun `get key when value is found`() {
-        givenOperation(GetOperation(SOME_KEY))
-        expectWrittenLine("get $SOME_KEY")
+    fun `gat key when value is found`() {
+        givenOperation(GatOperation(SOME_KEY, SOME_EXPIRATION))
+        expectWrittenLine("gat $SOME_EXPIRATION_VALUE $SOME_KEY")
         givenReadLineReturns("VALUE $SOME_KEY 1 5", "END")
         givenReadBinaryBlock("abcde".toByteArray(Charsets.US_ASCII))
 
@@ -31,9 +31,9 @@ internal class GetOperationUnitTest : BaseOperationUnitTest<GetGatResult<ByteArr
     }
 
     @Test
-    fun `fail when get returns a not matching key`() {
-        givenOperation(GetOperation(SOME_KEY))
-        expectWrittenLine("get $SOME_KEY")
+    fun `fail when gat returns a not matching key`() {
+        givenOperation(GatOperation(SOME_KEY, SOME_EXPIRATION))
+        expectWrittenLine("gat $SOME_EXPIRATION_VALUE $SOME_KEY")
         givenReadLineReturns("VALUE other-key 1 5", "END")
         givenReadBinaryBlock("abcde".toByteArray(Charsets.US_ASCII))
 

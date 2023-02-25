@@ -5,11 +5,11 @@ import com.raycoarana.memkched.internal.result.GetGatResult
 import com.raycoarana.memkched.internal.result.GetGatResult.NotFound
 import org.junit.jupiter.api.Test
 
-internal class MultiGetOperationUnitTest : BaseOperationUnitTest<Map<String, GetGatResult<ByteArray>>>() {
+internal class MultiGatOperationUnitTest : BaseOperationUnitTest<Map<String, GetGatResult<ByteArray>>>() {
     @Test
-    fun `get key when value is not found`() {
-        givenOperation(MultiGetOperation(listOf(SOME_KEY, SOME_OTHER_KEY)))
-        expectWrittenLine("get $SOME_KEY $SOME_OTHER_KEY")
+    fun `gat key when value is not found`() {
+        givenOperation(MultiGatOperation(listOf(SOME_KEY, SOME_OTHER_KEY), SOME_EXPIRATION))
+        expectWrittenLine("gat $SOME_EXPIRATION_VALUE $SOME_KEY $SOME_OTHER_KEY")
         givenReadLineReturns("END")
 
         whenRun()
@@ -23,9 +23,9 @@ internal class MultiGetOperationUnitTest : BaseOperationUnitTest<Map<String, Get
     }
 
     @Test
-    fun `get key when one value is found`() {
-        givenOperation(MultiGetOperation(listOf(SOME_KEY, SOME_OTHER_KEY)))
-        expectWrittenLine("get $SOME_KEY $SOME_OTHER_KEY")
+    fun `gat key when one value is found`() {
+        givenOperation(MultiGatOperation(listOf(SOME_KEY, SOME_OTHER_KEY), SOME_EXPIRATION))
+        expectWrittenLine("gat $SOME_EXPIRATION_VALUE $SOME_KEY $SOME_OTHER_KEY")
         givenReadLineReturns("VALUE $SOME_KEY 1 5", "END")
         givenReadBinaryBlock("abcde".toByteArray(Charsets.US_ASCII))
 
@@ -40,8 +40,8 @@ internal class MultiGetOperationUnitTest : BaseOperationUnitTest<Map<String, Get
     }
 
     @Test
-    fun `get no key will return empty map`() {
-        givenOperation(MultiGetOperation(emptyList()))
+    fun `gat no key will return empty map`() {
+        givenOperation(MultiGatOperation(emptyList(), SOME_EXPIRATION))
 
         whenRun()
 

@@ -17,8 +17,8 @@ import com.raycoarana.memkched.internal.result.DeleteResult
 import com.raycoarana.memkched.internal.result.DeleteResult.Deleted
 import com.raycoarana.memkched.internal.result.FlushAllResult
 import com.raycoarana.memkched.internal.result.FlushAllResult.Ok
-import com.raycoarana.memkched.internal.result.GetResult
-import com.raycoarana.memkched.internal.result.GetsResult
+import com.raycoarana.memkched.internal.result.GetGatResult
+import com.raycoarana.memkched.internal.result.GetsGatsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult.Value
 import com.raycoarana.memkched.internal.result.SetResult
@@ -40,8 +40,8 @@ import kotlin.test.assertEquals
 import com.raycoarana.memkched.internal.result.AddReplaceResult.Stored as AddReplaceStored
 import com.raycoarana.memkched.internal.result.AppendPrependResult.Stored as AppendPrependStored
 import com.raycoarana.memkched.internal.result.CasResult.Stored as CasStored
-import com.raycoarana.memkched.internal.result.GetResult.Value as GetValue
-import com.raycoarana.memkched.internal.result.GetsResult.Value as GetsValue
+import com.raycoarana.memkched.internal.result.GetGatResult.Value as GetValue
+import com.raycoarana.memkched.internal.result.GetsGatsResult.Value as GetsValue
 import com.raycoarana.memkched.internal.result.SetResult.Stored as SetStored
 
 class MemkchedClientUnitTest {
@@ -67,7 +67,7 @@ class MemkchedClientUnitTest {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
         every { createOperationFactory.get(SOME_KEY) } returns
-            operation as Operation<SocketChannelWrapper, GetResult<ByteArray>>
+            operation as Operation<SocketChannelWrapper, GetGatResult<ByteArray>>
         givenAwaitForOperationResultReturns(GetValue(Flags(), BYTE_ARRAY))
 
         val result = client.get(SOME_KEY, transcoder)
@@ -81,7 +81,7 @@ class MemkchedClientUnitTest {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
         every { createOperationFactory.get(listOf(SOME_KEY)) } returns
-            operation as Operation<SocketChannelWrapper, Map<String, GetResult<ByteArray>>>
+            operation as Operation<SocketChannelWrapper, Map<String, GetGatResult<ByteArray>>>
         givenAwaitForOperationResultReturns(mapOf(SOME_KEY to GetValue(Flags(), BYTE_ARRAY)))
 
         val result = client.get(listOf(SOME_KEY), transcoder)
@@ -95,7 +95,7 @@ class MemkchedClientUnitTest {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
         every { createOperationFactory.gets(SOME_KEY) } returns
-            operation as Operation<SocketChannelWrapper, GetsResult<ByteArray>>
+            operation as Operation<SocketChannelWrapper, GetsGatsResult<ByteArray>>
         givenAwaitForOperationResultReturns(GetsValue(Flags(), BYTE_ARRAY, SOME_CAS_UNIQUE))
 
         val result = client.gets(SOME_KEY, transcoder)
@@ -109,12 +109,70 @@ class MemkchedClientUnitTest {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
         every { createOperationFactory.gets(listOf(SOME_KEY)) } returns
-            operation as Operation<SocketChannelWrapper, Map<String, GetsResult<ByteArray>>>
+            operation as Operation<SocketChannelWrapper, Map<String, GetsGatsResult<ByteArray>>>
         givenAwaitForOperationResultReturns(
             mapOf(SOME_KEY to GetsValue(Flags(), BYTE_ARRAY, SOME_CAS_UNIQUE))
         )
 
         val result = client.gets(listOf(SOME_KEY), transcoder)
+
+        assertEquals(mapOf(SOME_KEY to GetsValue(Flags(), ORIGINAL_DATA, SOME_CAS_UNIQUE)), result)
+    }
+
+    @Test
+    @Suppress("UNCHECKED_CAST")
+    fun `queue gat operation and await its completion`() = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every { createOperationFactory.gat(SOME_KEY, SOME_EXPIRATION) } returns
+            operation as Operation<SocketChannelWrapper, GetGatResult<ByteArray>>
+        givenAwaitForOperationResultReturns(GetValue(Flags(), BYTE_ARRAY))
+
+        val result = client.gat(SOME_KEY, SOME_EXPIRATION, transcoder)
+
+        assertEquals(GetValue(Flags(), ORIGINAL_DATA), result)
+    }
+
+    @Test
+    @Suppress("UNCHECKED_CAST")
+    fun `queue multi-gat operation and await its completion`() = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every { createOperationFactory.gat(listOf(SOME_KEY), SOME_EXPIRATION) } returns
+            operation as Operation<SocketChannelWrapper, Map<String, GetGatResult<ByteArray>>>
+        givenAwaitForOperationResultReturns(mapOf(SOME_KEY to GetValue(Flags(), BYTE_ARRAY)))
+
+        val result = client.gat(listOf(SOME_KEY), SOME_EXPIRATION, transcoder)
+
+        assertEquals(mapOf(SOME_KEY to GetValue(Flags(), ORIGINAL_DATA)), result)
+    }
+
+    @Test
+    @Suppress("UNCHECKED_CAST")
+    fun `queue gats operation and await its completion`() = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every { createOperationFactory.gats(SOME_KEY, SOME_EXPIRATION) } returns
+            operation as Operation<SocketChannelWrapper, GetsGatsResult<ByteArray>>
+        givenAwaitForOperationResultReturns(GetsValue(Flags(), BYTE_ARRAY, SOME_CAS_UNIQUE))
+
+        val result = client.gats(SOME_KEY, SOME_EXPIRATION, transcoder)
+
+        assertEquals(GetsValue(Flags(), ORIGINAL_DATA, SOME_CAS_UNIQUE), result)
+    }
+
+    @Test
+    @Suppress("UNCHECKED_CAST")
+    fun `queue multi-gats operation and await its completion`() = runBlocking {
+        givenSomeOpTimeout()
+        givenOperationIsSentSuccessfully()
+        every { createOperationFactory.gats(listOf(SOME_KEY), SOME_EXPIRATION) } returns
+            operation as Operation<SocketChannelWrapper, Map<String, GetsGatsResult<ByteArray>>>
+        givenAwaitForOperationResultReturns(
+            mapOf(SOME_KEY to GetsValue(Flags(), BYTE_ARRAY, SOME_CAS_UNIQUE))
+        )
+
+        val result = client.gats(listOf(SOME_KEY), SOME_EXPIRATION, transcoder)
 
         assertEquals(mapOf(SOME_KEY to GetsValue(Flags(), ORIGINAL_DATA, SOME_CAS_UNIQUE)), result)
     }
@@ -125,11 +183,11 @@ class MemkchedClientUnitTest {
     fun `queue set operation and await its completion`(reply: Reply) = runBlocking {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
-        every { createOperationFactory.set(SOME_KEY, Flags(), Relative(100), BYTE_ARRAY, reply) } returns
+        every { createOperationFactory.set(SOME_KEY, Flags(), SOME_EXPIRATION, BYTE_ARRAY, reply) } returns
             operation as Operation<SocketChannelWrapper, SetResult>
         givenAwaitForOperationResultReturns(SetStored)
 
-        val result = client.set(SOME_KEY, ORIGINAL_DATA, transcoder, Relative(100), Flags(), reply)
+        val result = client.set(SOME_KEY, ORIGINAL_DATA, transcoder, SOME_EXPIRATION, Flags(), reply)
 
         assertEquals(SetStored, result)
     }
@@ -140,11 +198,11 @@ class MemkchedClientUnitTest {
     fun `queue add operation and await its completion`(reply: Reply) = runBlocking {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
-        every { createOperationFactory.add(SOME_KEY, Flags(), Relative(100), BYTE_ARRAY, reply) } returns
+        every { createOperationFactory.add(SOME_KEY, Flags(), SOME_EXPIRATION, BYTE_ARRAY, reply) } returns
             operation as Operation<SocketChannelWrapper, AddReplaceResult>
         givenAwaitForOperationResultReturns(AddReplaceStored)
 
-        val result = client.add(SOME_KEY, ORIGINAL_DATA, transcoder, Relative(100), Flags(), reply)
+        val result = client.add(SOME_KEY, ORIGINAL_DATA, transcoder, SOME_EXPIRATION, Flags(), reply)
 
         assertEquals(AddReplaceStored, result)
     }
@@ -155,11 +213,11 @@ class MemkchedClientUnitTest {
     fun `queue replace operation and await its completion`(reply: Reply) = runBlocking {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
-        every { createOperationFactory.replace(SOME_KEY, Flags(), Relative(100), BYTE_ARRAY, reply) } returns
+        every { createOperationFactory.replace(SOME_KEY, Flags(), SOME_EXPIRATION, BYTE_ARRAY, reply) } returns
             operation as Operation<SocketChannelWrapper, AddReplaceResult>
         givenAwaitForOperationResultReturns(AddReplaceStored)
 
-        val result = client.replace(SOME_KEY, ORIGINAL_DATA, transcoder, Relative(100), Flags(), reply)
+        val result = client.replace(SOME_KEY, ORIGINAL_DATA, transcoder, SOME_EXPIRATION, Flags(), reply)
 
         assertEquals(AddReplaceStored, result)
     }
@@ -201,12 +259,12 @@ class MemkchedClientUnitTest {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
         every {
-            createOperationFactory.cas(SOME_KEY, Flags(), Relative(100), BYTE_ARRAY, CasUnique(123), reply)
+            createOperationFactory.cas(SOME_KEY, Flags(), SOME_EXPIRATION, BYTE_ARRAY, CasUnique(123), reply)
         } returns operation as Operation<SocketChannelWrapper, CasResult>
         givenAwaitForOperationResultReturns(CasStored)
 
         val result =
-            client.cas(SOME_KEY, ORIGINAL_DATA, transcoder, Relative(100), CasUnique(123), Flags(), reply)
+            client.cas(SOME_KEY, ORIGINAL_DATA, transcoder, SOME_EXPIRATION, CasUnique(123), Flags(), reply)
 
         assertEquals(CasStored, result)
     }
@@ -218,11 +276,11 @@ class MemkchedClientUnitTest {
         givenSomeOpTimeout()
         givenOperationIsSentSuccessfully()
         every {
-            createOperationFactory.touch(SOME_KEY, Relative(100), reply)
+            createOperationFactory.touch(SOME_KEY, SOME_EXPIRATION, reply)
         } returns operation as Operation<SocketChannelWrapper, TouchResult>
         givenAwaitForOperationResultReturns(Touched)
 
-        val result = client.touch(SOME_KEY, Relative(100), reply)
+        val result = client.touch(SOME_KEY, SOME_EXPIRATION, reply)
 
         assertEquals(Touched, result)
     }
@@ -309,6 +367,7 @@ class MemkchedClientUnitTest {
         private const val ORIGINAL_DATA = "some-result"
         private val SOME_CAS_UNIQUE = CasUnique(1234L)
         private val BYTE_ARRAY = ORIGINAL_DATA.toByteArray(Charsets.US_ASCII)
+        private val SOME_EXPIRATION = Relative(100)
 
         @JvmStatic
         fun replyProvider() = listOf(

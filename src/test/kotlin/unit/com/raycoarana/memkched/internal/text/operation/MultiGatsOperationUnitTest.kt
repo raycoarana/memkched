@@ -7,11 +7,11 @@ import com.raycoarana.memkched.internal.result.GetsGatsResult.NotFound
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class MultiGetsOperationUnitTest : BaseOperationUnitTest<Map<String, GetsGatsResult<ByteArray>>>() {
+internal class MultiGatsOperationUnitTest : BaseOperationUnitTest<Map<String, GetsGatsResult<ByteArray>>>() {
     @Test
-    fun `gets key when value is not found`() {
-        givenOperation(MultiGetsOperation(listOf(SOME_KEY, SOME_OTHER_KEY)))
-        expectWrittenLine("gets $SOME_KEY $SOME_OTHER_KEY")
+    fun `gats key when value is not found`() {
+        givenOperation(MultiGatsOperation(listOf(SOME_KEY, SOME_OTHER_KEY), SOME_EXPIRATION))
+        expectWrittenLine("gats $SOME_EXPIRATION_VALUE $SOME_KEY $SOME_OTHER_KEY")
         givenReadLineReturns("END")
 
         whenRun()
@@ -25,9 +25,9 @@ internal class MultiGetsOperationUnitTest : BaseOperationUnitTest<Map<String, Ge
     }
 
     @Test
-    fun `gets key when one value is found`() {
-        givenOperation(MultiGetsOperation(listOf(SOME_KEY, SOME_OTHER_KEY)))
-        expectWrittenLine("gets $SOME_KEY $SOME_OTHER_KEY")
+    fun `gats key when one value is found`() {
+        givenOperation(MultiGatsOperation(listOf(SOME_KEY, SOME_OTHER_KEY), SOME_EXPIRATION))
+        expectWrittenLine("gats $SOME_EXPIRATION_VALUE $SOME_KEY $SOME_OTHER_KEY")
         givenReadLineReturns("VALUE $SOME_KEY 1 5 27", "END")
         givenReadBinaryBlock("abcde".toByteArray(Charsets.US_ASCII))
 
@@ -42,8 +42,8 @@ internal class MultiGetsOperationUnitTest : BaseOperationUnitTest<Map<String, Ge
     }
 
     @Test
-    fun `gets no key will return empty map`() {
-        givenOperation(MultiGetsOperation(emptyList()))
+    fun `gats no key will return empty map`() {
+        givenOperation(MultiGatsOperation(emptyList(), SOME_EXPIRATION))
 
         whenRun()
 
@@ -51,9 +51,9 @@ internal class MultiGetsOperationUnitTest : BaseOperationUnitTest<Map<String, Ge
     }
 
     @Test
-    fun `fail when gets returns not include cas unique`() {
-        givenOperation(MultiGetsOperation(listOf(SOME_KEY)))
-        expectWrittenLine("gets $SOME_KEY")
+    fun `fail when gats returns not include cas unique`() {
+        givenOperation(MultiGatsOperation(listOf(SOME_KEY), SOME_EXPIRATION))
+        expectWrittenLine("gats $SOME_EXPIRATION_VALUE $SOME_KEY")
         givenReadLineReturns("VALUE $SOME_KEY 1 5", "END")
         givenReadBinaryBlock("abcde".toByteArray(Charsets.US_ASCII))
 

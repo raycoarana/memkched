@@ -1,16 +1,16 @@
 package com.raycoarana.memkched.internal.text.operation
 
 import com.raycoarana.memkched.internal.Operation
-import com.raycoarana.memkched.internal.result.GetResult
+import com.raycoarana.memkched.internal.result.GetGatResult
 import com.raycoarana.memkched.internal.text.END
 import com.raycoarana.memkched.internal.text.TextProtocolSocketChannelWrapper
 import com.raycoarana.memkched.internal.text.parsing.ValueLine
 
-internal class GetOperation(
+internal open class GetOperation(
     private val key: String
-) : Operation<TextProtocolSocketChannelWrapper, GetResult<ByteArray>>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): GetResult<ByteArray> {
-        val cmd = "get $key"
+) : Operation<TextProtocolSocketChannelWrapper, GetGatResult<ByteArray>>() {
+    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): GetGatResult<ByteArray> {
+        val cmd = buildCommand()
         socketChannelWrapper.writeLine(cmd)
         val result = socketChannelWrapper.readLine()
         if (result != END) {
@@ -23,8 +23,10 @@ internal class GetOperation(
             assert(valueLine.key == key) {
                 "Unexpected key ${valueLine.key} when requesting $key"
             }
-            return GetResult.Value(valueLine.flags, data)
+            return GetGatResult.Value(valueLine.flags, data)
         }
-        return GetResult.NotFound
+        return GetGatResult.NotFound
     }
+
+    protected open fun buildCommand() = "get $key"
 }
