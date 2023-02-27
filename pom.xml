@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.raycoarana.memkched</groupId>
@@ -11,6 +11,7 @@
   <name>memKched</name>
   <modules>
     <module>memkched-client</module>
+    <module>memkched-benchmark</module>
   </modules>
 
   <properties>
@@ -18,6 +19,7 @@
     <kotlin.version>1.8.10</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
+    <javac.target>17</javac.target>
     <kotlin.code.style>official</kotlin.code.style>
     <detekt.version>1.22.0</detekt.version>
     <junit.version>4.13.1</junit.version>
