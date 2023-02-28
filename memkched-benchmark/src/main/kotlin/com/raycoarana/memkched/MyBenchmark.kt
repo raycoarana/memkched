@@ -13,6 +13,7 @@ import org.openjdk.jmh.annotations.Mode.Throughput
 import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.Setup
 import org.openjdk.jmh.annotations.State
+import org.openjdk.jmh.annotations.TearDown
 import org.openjdk.jmh.annotations.Warmup
 import java.net.InetSocketAddress
 
@@ -27,6 +28,16 @@ open class MyBenchmark {
     fun setUp() {
         memkchedClient = MemkchedClientBuilder().node(InetSocketAddress("localhost", 11211))
             .build()
+        runBlocking {
+            memkchedClient.initialize()
+        }
+    }
+
+    @TearDown
+    fun tearDown() {
+        runBlocking {
+            memkchedClient.stop()
+        }
     }
 
     @Group

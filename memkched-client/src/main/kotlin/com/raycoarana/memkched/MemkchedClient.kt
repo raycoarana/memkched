@@ -34,6 +34,10 @@ class MemkchedClient internal constructor(
         cluster.start()
     }
 
+    suspend fun stop() {
+        cluster.stop()
+    }
+
     /**
      * Memcached GET operation of a single key
      *
