@@ -4,6 +4,14 @@ import com.raycoarana.memkched.api.Expiration.Absolute
 import com.raycoarana.memkched.api.Expiration.Relative
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.DAYS
+import java.util.concurrent.TimeUnit.HOURS
+import java.util.concurrent.TimeUnit.MINUTES
 
 /**
  * Expiration time of the stored key/value, it can be expressed as a relative or absolute value
@@ -22,6 +30,14 @@ sealed class Expiration(val value: Long) {
         init {
             require(value <= MAX_RELATIVE_EXPIRATION) { "Relative expire date can't exceed 30 days in seconds" }
         }
+
+        companion object {
+            fun of(value: Int, unit: TimeUnit) = Relative(unit.toSeconds(value.toLong()).toInt())
+            fun ofSeconds(seconds: Int) = Relative(seconds)
+            fun ofMinutes(minutes: Int) = of(minutes, MINUTES)
+            fun ofHours(hours: Int) = of(hours, HOURS)
+            fun ofDays(days: Int) = of(days, DAYS)
+        }
     }
 
     /**
@@ -31,6 +47,13 @@ sealed class Expiration(val value: Long) {
     class Absolute(value: Instant) : Expiration(value.epochSecond) {
         init {
             require(Instant.now().isBefore(value)) { "Absolute expire date can't be in the past" }
+        }
+
+        companion object {
+            fun ofZonedDateTime(zonedDateTime: ZonedDateTime) = Absolute(zonedDateTime.toInstant())
+            fun ofOffsetDateTime(offsetDateTime: OffsetDateTime) = Absolute(offsetDateTime.toInstant())
+            fun ofLocalDateTime(localDateTime: LocalDateTime, offset: ZoneOffset) =
+                Absolute(localDateTime.toInstant(offset))
         }
     }
 
