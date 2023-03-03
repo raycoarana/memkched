@@ -26,7 +26,8 @@ open class MyBenchmark {
 
     @Setup
     fun setUp() {
-        memkchedClient = MemkchedClientBuilder().node(InetSocketAddress("localhost", 11211))
+        memkchedClient = MemkchedClientBuilder()
+            .node(InetSocketAddress("localhost", MEMCACHED_DEFAULT_PORT))
             .build()
         runBlocking {
             memkchedClient.initialize()
@@ -44,7 +45,7 @@ open class MyBenchmark {
     @Benchmark
     fun runSet(): SetResult =
         runBlocking {
-            memkchedClient.set("my-key", DATA, Transcoder.IDENTITY, Relative(300))
+            memkchedClient.set("my-key", DATA, Transcoder.IDENTITY, Relative(FIVE_MINUTES))
         }
 
     @Group
@@ -61,5 +62,7 @@ open class MyBenchmark {
             |   "prop2": "value2",
             |}
         """.trimMargin().toByteArray()
+        private const val FIVE_MINUTES = 300
+        private const val MEMCACHED_DEFAULT_PORT = 11211
     }
 }
