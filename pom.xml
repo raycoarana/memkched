@@ -12,6 +12,7 @@
   <modules>
     <module>memkched-client</module>
     <module>memkched-benchmark</module>
+    <module>memkched-jackson</module>
   </modules>
 
   <properties>
