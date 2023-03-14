@@ -39,7 +39,9 @@ class MemkchedClientKtUnitTest {
 
         val json = Json { prettyPrint = true }
         every { memkchedClient.viewWith(transcoder) } returns memkchedClientView
-        every { constructedWith<SerializationJsonTranscoderFactory>(EqMatcher(json)).create<String>() } returns transcoder
+        every {
+            constructedWith<SerializationJsonTranscoderFactory>(EqMatcher(json)).create<String>()
+        } returns transcoder
 
         val view = memkchedClient.viewWith<String>(json = json)
 
@@ -89,7 +91,9 @@ class MemkchedClientKtUnitTest {
         val transcoder: Transcoder<String> = mockk()
 
         every { memkchedClient.viewWith(transcoder) } returns memkchedClientView
-        every { constructedWith<SerializationJsonTranscoderFactory>(EqMatcher(Json)).create<String>() } returns transcoder
+        every {
+            constructedWith<SerializationJsonTranscoderFactory>(EqMatcher(Json)).create<String>()
+        } returns transcoder
 
         val view = memkchedClient.viewWith<String>()
 
