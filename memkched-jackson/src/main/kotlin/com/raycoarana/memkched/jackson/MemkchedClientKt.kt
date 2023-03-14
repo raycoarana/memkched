@@ -17,7 +17,7 @@ inline fun <reified T> MemkchedClient.viewWith(
     viewWith(jacksonTranscoderFactory.forType(jacksonTypeRef<T>()))
 
 /**
- * Create view of MemkchedClient using the provided JacksonTranscoderFactory with the type T
+ * Create view of MemkchedClient using the provided ObjectMapper
  * @param objectMapper ObjectMapper with the configuration to create the JacksonTranscoderFactory
  *
  * @return MemkchedClientView<T> that uses Jackson library to encode/decode using JSON
