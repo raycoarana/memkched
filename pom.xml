@@ -13,6 +13,7 @@
     <module>memkched-client</module>
     <module>memkched-benchmark</module>
     <module>memkched-jackson</module>
+    <module>memkched-kotlinx-serialization-json</module>
   </modules>
 
   <properties>
