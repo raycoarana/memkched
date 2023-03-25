@@ -20,17 +20,17 @@ internal class CasOperation(
     private val casUnique: CasUnique,
     private val reply: Reply
 ) : Operation<TextProtocolSocketChannelWrapper, CasResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): CasResult {
+    override suspend fun run(socket: TextProtocolSocketChannelWrapper): CasResult {
         val replyText = reply.asTextCommandValue()
         val cmd = "cas $key ${flags.toUShort()} ${expiration.value} ${data.size} ${casUnique.value}$replyText"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+        socket.writeLine(cmd)
+        socket.writeBinary(data)
 
         if (reply == Reply.NO_REPLY) {
             return CasResult.NoReply
         }
 
-        return when (val result = socketChannelWrapper.readLine()) {
+        return when (val result = socket.readLine()) {
             STORED -> CasResult.Stored
             EXISTS -> CasResult.Exists
             NOT_FOUND -> CasResult.NotFound

@@ -3,8 +3,8 @@ package com.raycoarana.memkched.internal.binary.operation
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.internal.Operation
 import com.raycoarana.memkched.internal.binary.BinaryProtocolSocketChannelWrapper
-import com.raycoarana.memkched.internal.binary.OpCode
-import com.raycoarana.memkched.internal.binary.Status.KEY_NOT_FOUND
+import com.raycoarana.memkched.internal.binary.model.OpCode
+import com.raycoarana.memkched.internal.binary.model.Status.KEY_NOT_FOUND
 import com.raycoarana.memkched.internal.result.GetGatResult
 import com.raycoarana.memkched.internal.result.GetGatResult.Value
 import java.nio.ByteBuffer
@@ -22,7 +22,7 @@ internal open class GetOperation(
                 socket.readValue(extrasLength, keyLength, totalBodyLength)
             },
             { error, key ->
-                key?.let { require(it == key) { "Unexpected key $it"} }
+                key?.let { require(it == key) { "Unexpected key $it" } }
 
                 if (error.status == KEY_NOT_FOUND) {
                     GetGatResult.NotFound

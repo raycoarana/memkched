@@ -14,7 +14,7 @@ internal class ReplaceOperation(
     private val data: ByteArray,
     private val reply: Reply
 ) : Operation<BinaryProtocolSocketChannelWrapper, AddReplaceResult>() {
-    override suspend fun run(socketChannelWrapper: BinaryProtocolSocketChannelWrapper): AddReplaceResult {
+    override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): AddReplaceResult {
         TODO("Not yet implemented")
     }
 }

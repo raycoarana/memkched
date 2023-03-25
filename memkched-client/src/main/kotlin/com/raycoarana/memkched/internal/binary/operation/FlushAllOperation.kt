@@ -10,7 +10,7 @@ internal class FlushAllOperation(
     private val expiration: Expiration?,
     private val reply: Reply
 ) : Operation<BinaryProtocolSocketChannelWrapper, FlushAllResult>() {
-    override suspend fun run(socketChannelWrapper: BinaryProtocolSocketChannelWrapper): FlushAllResult {
+    override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): FlushAllResult {
         TODO("Not yet implemented")
     }
 }

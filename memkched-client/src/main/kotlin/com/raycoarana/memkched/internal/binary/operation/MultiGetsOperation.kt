@@ -8,7 +8,7 @@ internal open class MultiGetsOperation(
     private val keys: List<String>
 ) : Operation<BinaryProtocolSocketChannelWrapper, Map<String, GetsGatsResult<ByteArray>>>() {
     override suspend fun run(
-        socketChannelWrapper: BinaryProtocolSocketChannelWrapper
+        socket: BinaryProtocolSocketChannelWrapper
     ): Map<String, GetsGatsResult<ByteArray>> {
         TODO("Not yet implemented")
     }

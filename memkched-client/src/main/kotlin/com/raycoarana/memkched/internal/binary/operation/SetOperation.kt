@@ -6,9 +6,9 @@ import com.raycoarana.memkched.api.Reply
 import com.raycoarana.memkched.api.Reply.Companion
 import com.raycoarana.memkched.internal.Operation
 import com.raycoarana.memkched.internal.binary.BinaryProtocolSocketChannelWrapper
-import com.raycoarana.memkched.internal.binary.OpCode
+import com.raycoarana.memkched.internal.binary.model.OpCode
+import com.raycoarana.memkched.internal.binary.buildExtrasWith
 import com.raycoarana.memkched.internal.result.SetResult
-import java.nio.ByteBuffer
 
 internal class SetOperation(
     private val key: String,
@@ -26,11 +26,7 @@ internal class SetOperation(
         socket.writePackage(
             opCode = opCode,
             key = key,
-            extras = ByteBuffer.allocate(8)
-                .putInt(flags.toUShort().toInt())
-                .putInt(expiration.value.toInt())
-                .flip()
-                .array(),
+            extras = buildExtrasWith(flags, expiration),
             body = data
         )
 

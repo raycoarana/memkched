@@ -16,7 +16,7 @@ internal class CasOperation(
     private val casUnique: CasUnique,
     private val reply: Reply
 ) : Operation<BinaryProtocolSocketChannelWrapper, CasResult>() {
-    override suspend fun run(socketChannelWrapper: BinaryProtocolSocketChannelWrapper): CasResult {
+    override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): CasResult {
         TODO("Not yet implemented")
     }
 }

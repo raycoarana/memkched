@@ -11,7 +11,7 @@ internal class TouchOperation(
     private val expiration: Expiration,
     private val reply: Reply
 ) : Operation<BinaryProtocolSocketChannelWrapper, TouchResult>() {
-    override suspend fun run(socketChannelWrapper: BinaryProtocolSocketChannelWrapper): TouchResult {
+    override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): TouchResult {
         TODO("Not yet implemented")
     }
 }

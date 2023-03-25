@@ -1,8 +1,8 @@
 package com.raycoarana.memkched.internal.error
 
 import com.raycoarana.memkched.internal.MemcachedException
-import com.raycoarana.memkched.internal.binary.OpCode
-import com.raycoarana.memkched.internal.binary.Status
+import com.raycoarana.memkched.internal.binary.model.OpCode
+import com.raycoarana.memkched.internal.binary.model.Status
 import com.raycoarana.memkched.internal.text.CLIENT_ERROR
 import com.raycoarana.memkched.internal.text.ERROR
 import com.raycoarana.memkched.internal.text.SERVER_ERROR

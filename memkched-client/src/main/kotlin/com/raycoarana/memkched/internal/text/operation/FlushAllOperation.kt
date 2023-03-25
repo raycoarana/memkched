@@ -14,16 +14,16 @@ internal class FlushAllOperation(
     private val expiration: Expiration?,
     private val reply: Reply
 ) : Operation<TextProtocolSocketChannelWrapper, FlushAllResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): FlushAllResult {
+    override suspend fun run(socket: TextProtocolSocketChannelWrapper): FlushAllResult {
         val expirationValue = expiration?.value?.let { " $it" } ?: ""
         val cmd = "flush_all$expirationValue${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
+        socket.writeLine(cmd)
 
         if (reply == Reply.NO_REPLY) {
             return NoReply
         }
 
-        val result = socketChannelWrapper.readLine()
+        val result = socket.readLine()
         return if (result == OK) {
             Ok
         } else {

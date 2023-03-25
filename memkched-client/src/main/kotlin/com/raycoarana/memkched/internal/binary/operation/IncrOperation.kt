@@ -10,7 +10,7 @@ internal class IncrOperation(
     private val value: ULong,
     private val reply: Reply
 ) : Operation<BinaryProtocolSocketChannelWrapper, IncrDecrResult>() {
-    override suspend fun run(socketChannelWrapper: BinaryProtocolSocketChannelWrapper): IncrDecrResult {
+    override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): IncrDecrResult {
         TODO("Not yet implemented")
     }
 }

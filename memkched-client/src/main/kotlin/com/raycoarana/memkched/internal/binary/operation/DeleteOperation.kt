@@ -9,7 +9,7 @@ internal class DeleteOperation(
     private val key: String,
     private val reply: Reply
 ) : Operation<BinaryProtocolSocketChannelWrapper, DeleteResult>() {
-    override suspend fun run(socketChannelWrapper: BinaryProtocolSocketChannelWrapper): DeleteResult {
+    override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): DeleteResult {
         TODO("Not yet implemented")
     }
 }
