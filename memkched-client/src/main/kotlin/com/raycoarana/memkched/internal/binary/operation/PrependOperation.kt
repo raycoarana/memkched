@@ -10,7 +10,7 @@ internal class PrependOperation(
     private val data: ByteArray,
     private val reply: Reply
 ) : Operation<BinaryProtocolSocketChannelWrapper, AppendPrependResult>() {
-    override suspend fun run(socketChannelWrapper: BinaryProtocolSocketChannelWrapper): AppendPrependResult {
+    override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): AppendPrependResult {
         TODO("Not yet implemented")
     }
 }

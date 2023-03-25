@@ -7,7 +7,7 @@ import com.raycoarana.memkched.internal.result.GetsGatsResult
 internal open class GetsOperation(
     private val key: String
 ) : Operation<BinaryProtocolSocketChannelWrapper, GetsGatsResult<ByteArray>>() {
-    override suspend fun run(socketChannelWrapper: BinaryProtocolSocketChannelWrapper): GetsGatsResult<ByteArray> {
+    override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): GetsGatsResult<ByteArray> {
         TODO("Not yet implemented")
     }
 }

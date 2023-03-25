@@ -1,6 +1,11 @@
 package com.raycoarana.memkched.internal.binary
 
 import com.raycoarana.memkched.internal.SocketChannelWrapper
+import com.raycoarana.memkched.internal.binary.model.DATA_TYPE_RAW
+import com.raycoarana.memkched.internal.binary.model.MAGIC_REQUEST
+import com.raycoarana.memkched.internal.binary.model.MAGIC_RESPONSE
+import com.raycoarana.memkched.internal.binary.model.OpCode
+import com.raycoarana.memkched.internal.binary.model.Status
 import com.raycoarana.memkched.internal.error.MemcachedError.BinaryProtocolError
 import java.nio.ByteBuffer
 import java.nio.channels.CompletionHandler

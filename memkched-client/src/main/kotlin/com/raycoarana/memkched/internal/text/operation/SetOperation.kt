@@ -16,16 +16,16 @@ internal class SetOperation(
     private val data: ByteArray,
     private val reply: Reply
 ) : Operation<TextProtocolSocketChannelWrapper, SetResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): SetResult {
+    override suspend fun run(socket: TextProtocolSocketChannelWrapper): SetResult {
         val cmd = "set $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+        socket.writeLine(cmd)
+        socket.writeBinary(data)
 
         if (reply == Reply.NO_REPLY) {
             return SetResult.NoReply
         }
 
-        val result = socketChannelWrapper.readLine()
+        val result = socket.readLine()
         return if (result == STORED) {
             SetResult.Stored
         } else {
