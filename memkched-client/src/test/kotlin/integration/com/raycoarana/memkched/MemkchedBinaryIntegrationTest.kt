@@ -5,10 +5,14 @@ import com.raycoarana.memkched.api.Expiration.Relative
 import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Protocol.BINARY
 import com.raycoarana.memkched.internal.result.AddReplaceResult
+import com.raycoarana.memkched.internal.result.AppendPrependResult
 import com.raycoarana.memkched.internal.result.CasResult
+import com.raycoarana.memkched.internal.result.DeleteResult
 import com.raycoarana.memkched.internal.result.GetGatResult
 import com.raycoarana.memkched.internal.result.GetsGatsResult.Value
+import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.SetResult
+import com.raycoarana.memkched.internal.result.TouchResult
 import com.raycoarana.memkched.test.Containers
 import com.raycoarana.memkched.test.StringToBytesTranscoder
 import kotlinx.coroutines.runBlocking
@@ -53,6 +57,37 @@ class MemkchedBinaryIntegrationTest {
                     "other-key-2" to GetGatResult.NotFound
                 ),
                 multiGetResult
+            )
+        }
+    }
+
+    @Test
+    fun testGatE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .protocol(BINARY)
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val gatResult = client.gat("some-key", Relative(100), StringToBytesTranscoder)
+            assertEquals(GetGatResult.NotFound, gatResult)
+
+            val result = client.set("some-key", "some-data", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val gatResultAfterSet = client.gat("some-key", Relative(100), StringToBytesTranscoder)
+            assertEquals(GetGatResult.Value(Flags(), "some-data"), gatResultAfterSet)
+
+            val multiGatResult = client.gat(listOf("some-key", "other-key"), Relative(100), StringToBytesTranscoder)
+            assertEquals(
+                mapOf(
+                    "some-key" to GetGatResult.Value(Flags(), "some-data"),
+                    "other-key" to GetGatResult.NotFound
+                ),
+                multiGatResult
             )
         }
     }
@@ -113,6 +148,159 @@ class MemkchedBinaryIntegrationTest {
 
             val addExistsResult = client.add("some-key", "some-data", StringToBytesTranscoder, Relative(100))
             assertEquals(AddReplaceResult.NotStored, addExistsResult)
+        }
+    }
+
+    @Test
+    fun testAppendE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .protocol(BINARY)
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val appendResult = client.append("some-key", "some-data", StringToBytesTranscoder)
+            assertEquals(AppendPrependResult.NotStored, appendResult)
+
+            val result = client.set("some-key", "HELLO", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val appendAfterSetResult = client.append("some-key", "some-data", StringToBytesTranscoder)
+            assertEquals(AppendPrependResult.Stored, appendAfterSetResult)
+
+            val getResultAfterAppend = client.get("some-key", StringToBytesTranscoder)
+            assertEquals(GetGatResult.Value(Flags(), "HELLOsome-data"), getResultAfterAppend)
+        }
+    }
+
+    @Test
+    fun testPrependE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .protocol(BINARY)
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val prependResult = client.prepend("some-key", "some-data", StringToBytesTranscoder)
+            assertEquals(AppendPrependResult.NotStored, prependResult)
+
+            val result = client.set("some-key", "HELLO", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val prependAfterSetResult = client.prepend("some-key", "some-data", StringToBytesTranscoder)
+            assertEquals(AppendPrependResult.Stored, prependAfterSetResult)
+
+            val getResultAfterAppend = client.get("some-key", StringToBytesTranscoder)
+            assertEquals(GetGatResult.Value(Flags(), "some-dataHELLO"), getResultAfterAppend)
+        }
+    }
+
+    @Test
+    fun testTouchE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .protocol(BINARY)
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val touchResult =
+                client.touch("some-key", Relative(100))
+            assertEquals(TouchResult.NotFound, touchResult)
+
+            val result = client.set("some-key", "HELLO", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val touchExistingResult =
+                client.touch("some-key", Relative(100))
+            assertEquals(TouchResult.Touched, touchExistingResult)
+        }
+    }
+
+    @Test
+    fun testIncrE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .protocol(BINARY)
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val incrNotFoundResult = client.incr("some-key")
+            assertEquals(IncrDecrResult.NotFound, incrNotFoundResult)
+
+            val result = client.set("some-key", "1", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val incrResult = client.incr("some-key")
+            assertEquals(IncrDecrResult.Value(2L.toULong()), incrResult)
+
+            val max = ULong.MAX_VALUE.toString()
+            val setMaxResult = client.set("some-key", max, StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, setMaxResult)
+
+            val getMaxResult = client.get("some-key", StringToBytesTranscoder)
+            assertEquals(ULong.MAX_VALUE, (getMaxResult as GetGatResult.Value).data.toULong())
+
+            val maxResult = client.incr("some-key")
+            assertEquals(IncrDecrResult.Value(0.toULong()), maxResult)
+        }
+    }
+
+    @Test
+    fun testDecrE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .protocol(BINARY)
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val decrNotFoundResult = client.decr("some-key")
+            assertEquals(IncrDecrResult.NotFound, decrNotFoundResult)
+
+            val result = client.set("some-key", "1", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val decrResult = client.decr("some-key")
+            assertEquals(IncrDecrResult.Value(0.toULong()), decrResult)
+
+            val minResult = client.decr("some-key")
+            assertEquals(IncrDecrResult.Value(0.toULong()), minResult)
+        }
+    }
+
+    @Test
+    fun testDeleteE2E() {
+        val client = MemkchedClientBuilder()
+            .node(InetSocketAddress(memcached.host, memcached.getMappedPort(11211)))
+            .protocol(BINARY)
+            .operationTimeout(1, DAYS)
+            .build()
+
+        runBlocking {
+            client.initialize()
+
+            val notFoundResult = client.delete("some-key")
+            assertEquals(DeleteResult.NotFound, notFoundResult)
+
+            val result = client.set("some-key", "1", StringToBytesTranscoder, Relative(100))
+            assertEquals(SetResult.Stored, result)
+
+            val deleteResult = client.delete("some-key")
+            assertEquals(DeleteResult.Deleted, deleteResult)
         }
     }
 }

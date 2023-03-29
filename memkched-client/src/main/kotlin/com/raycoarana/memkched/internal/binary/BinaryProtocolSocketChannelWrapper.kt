@@ -150,6 +150,9 @@ internal class BinaryProtocolSocketChannelWrapper(
             channel.write(outBuffer, writeTimeout, MILLISECONDS, continuation, Handler)
         }
 
+    suspend fun readULong(): ULong =
+        ByteBuffer.wrap(readBinary(Long.SIZE_BYTES)).getLong().toULong()
+
     object Handler : CompletionHandler<Int, Continuation<Int>> {
         override fun completed(result: Int, attachment: Continuation<Int>) =
             attachment.resume(result)
