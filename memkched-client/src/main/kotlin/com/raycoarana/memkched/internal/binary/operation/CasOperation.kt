@@ -20,7 +20,7 @@ internal class CasOperation(
     private val casUnique: CasUnique,
     private val reply: Reply
 ) : Operation<BinaryProtocolSocketChannelWrapper, CasResult>() {
-    override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): CasResult {
+    internal override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): CasResult {
         val opCode = if (reply == Reply.NO_REPLY) {
             OpCode.SETQ
         } else {

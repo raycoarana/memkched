@@ -49,11 +49,15 @@ sealed class Expiration(val value: Long) {
             require(Instant.now().isBefore(value)) { "Absolute expire date can't be in the past" }
         }
 
+        internal constructor(value: Long) : this(Instant.ofEpochSecond(value))
+
         companion object {
             fun ofZonedDateTime(zonedDateTime: ZonedDateTime) = Absolute(zonedDateTime.toInstant())
             fun ofOffsetDateTime(offsetDateTime: OffsetDateTime) = Absolute(offsetDateTime.toInstant())
             fun ofLocalDateTime(localDateTime: LocalDateTime, offset: ZoneOffset) =
                 Absolute(localDateTime.toInstant(offset))
+
+            val MAX_VALUE = Absolute(0xFFffFFff.toLong())
         }
     }
 

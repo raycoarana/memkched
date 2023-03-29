@@ -12,7 +12,7 @@ internal abstract class AbstractGetOperation<T>(
     private val opCode: OpCode,
     private val key: String
 ) : Operation<BinaryProtocolSocketChannelWrapper, T>() {
-    override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): T {
+    internal override suspend fun run(socket: BinaryProtocolSocketChannelWrapper): T {
         socket.writePackage(opCode, key = key)
 
         return socket.readHeader(

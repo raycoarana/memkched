@@ -10,7 +10,7 @@ import com.raycoarana.memkched.internal.text.parsing.ValueLine
 internal open class MultiGetsOperation(
     private val keys: List<String>
 ) : Operation<TextProtocolSocketChannelWrapper, Map<String, GetsGatsResult<ByteArray>>>() {
-    override suspend fun run(
+    internal override suspend fun run(
         socket: TextProtocolSocketChannelWrapper
     ): Map<String, GetsGatsResult<ByteArray>> {
         if (keys.isEmpty()) {

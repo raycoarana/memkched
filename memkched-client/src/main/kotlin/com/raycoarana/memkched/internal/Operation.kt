@@ -19,7 +19,7 @@ internal abstract class Operation<in T : SocketChannelWrapper, out R> {
         }
     }
 
-    protected abstract suspend fun run(socket: T): R
+    internal abstract suspend fun run(socket: T): R
 
     suspend fun await(timeMillis: Long): R = withTimeout(timeMillis) { deferred.await() }
 }
