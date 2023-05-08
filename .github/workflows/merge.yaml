@@ -1,7 +1,8 @@
 name: CI that generates SNAPSHOT
-push:
-  branches:
-    - main
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   tests:
