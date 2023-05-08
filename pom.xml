@@ -18,13 +18,14 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <kotlin.version>1.8.10</kotlin.version>
+    <kotlin.version>1.8.20</kotlin.version>
+    <kotlin.coroutines.version>1.7.0</kotlin.coroutines.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
     <javac.target>17</javac.target>
     <kotlin.code.style>official</kotlin.code.style>
     <detekt.version>1.22.0</detekt.version>
-    <junit.version>4.13.1</junit.version>
+    <junit.version>5.9.2</junit.version>
   </properties>
 
   <dependencies>
@@ -36,10 +37,12 @@
     <dependency>
       <groupId>org.jetbrains.kotlinx</groupId>
       <artifactId>kotlinx-coroutines-core</artifactId>
+      <version>${kotlin.coroutines.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlinx</groupId>
       <artifactId>kotlinx-coroutines-slf4j</artifactId>
+      <version>${kotlin.coroutines.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -51,13 +54,13 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.9.2</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
-      <version>5.9.2</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
