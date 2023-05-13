@@ -1,4 +1,4 @@
-name: Publish package to the Maven Central Repository
+name: Publish release to Nexus
 on:
   release:
     types: [created]
@@ -20,19 +20,13 @@ jobs:
       - name: Verify & Install
         run: mvn clean install
 
-      # Doc generation
-      - name: Generate Dokka
-        run: mvn dokka:dokka jar:jar@dokka-jar
-      - name: Generate Javadoc
-        run: mvn dokka:javadocJar
-
       # Prepare for release
       - name: Prepare release
         run: mvn --batch-mode release:prepare
 
       # Publish
       - name: Publish package
-        run: mvn --batch-mode release:perform
+        run: mvn --batch-mode -pl -memkched-benchmark clean dokka:dokka jar:jar@dokka-jar dokka:javadocJar source:jar release:perform -Dmaven.test.skip=true
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}

@@ -1,6 +1,10 @@
-name: Preintegration
+name: Pre-integration
 on:
   pull_request
+
+concurrency:
+  group: pre-integration-${{ github.head_ref }}
+  cancel-in-progress: true
 
 jobs:
   tests:
@@ -15,10 +19,4 @@ jobs:
 
       # Tests
       - name: Verify & Install
-        run: mvn clean install
-
-      # Doc generation
-      - name: Generate Dokka
-        run: mvn dokka:dokka jar:jar@dokka-jar
-      - name: Generate Javadoc
-        run: mvn dokka:javadocJar
+        run: mvn clean dokka:dokka jar:jar@dokka-jar dokka:javadocJar source:jar install

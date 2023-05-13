@@ -5,6 +5,10 @@ on:
     branches:
       - 'main'
 
+concurrency:
+  group: benchmark
+  cancel-in-progress: true
+
 jobs:
   benchmark:
     runs-on: ubuntu-latest
