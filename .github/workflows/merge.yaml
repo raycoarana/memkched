@@ -1,8 +1,12 @@
-name: CI that generates SNAPSHOT
+name: Publish SNAPSHOT to Nexus
 on:
   push:
     branches:
       - main
+
+concurrency:
+  group: publish-snapshot
+  cancel-in-progress: true
 
 jobs:
   tests:
@@ -19,18 +23,12 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       # Tests
-      - name: Verify & Install
+      - name: Verify
         run: mvn clean install
-
-      # Doc generation
-      - name: Generate Dokka
-        run: mvn dokka:dokka jar:jar@dokka-jar
-      - name: Generate Javadoc
-        run: mvn dokka:javadocJar
 
       # Publish snapshot
       - name: Publish package
-        run: mvn --batch-mode deploy
+        run: mvn --batch-mode -pl -memkched-benchmark clean dokka:dokka jar:jar@dokka-jar dokka:javadocJar source:jar deploy -Dmaven.test.skip=true
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
