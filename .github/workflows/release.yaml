@@ -28,5 +28,5 @@ jobs:
       - name: Publish package
         run: mvn --batch-mode -pl -memkched-benchmark clean dokka:dokka jar:jar@dokka-jar dokka:javadocJar source:jar release:perform -Dmaven.test.skip=true
         env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_TOKEN }}
