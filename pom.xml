@@ -18,7 +18,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <kotlin.version>1.8.20</kotlin.version>
+    <kotlin.version>1.8.21</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
     <javac.target>17</javac.target>
@@ -75,7 +75,7 @@
     <dependency>
       <groupId>io.mockk</groupId>
       <artifactId>mockk-jvm</artifactId>
-      <version>1.13.4</version>
+      <version>1.13.5</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -91,7 +91,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.4.5</version>
+      <version>1.4.7</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -161,7 +161,7 @@
       <plugin>
         <groupId>org.jetbrains.dokka</groupId>
         <artifactId>dokka-maven-plugin</artifactId>
-        <version>1.7.20</version>
+        <version>1.8.10</version>
         <executions>
           <execution>
             <phase>pre-site</phase>
