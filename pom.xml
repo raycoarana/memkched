@@ -18,7 +18,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <kotlin.version>1.8.21</kotlin.version>
+    <kotlin.version>1.8.22</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
     <javac.target>17</javac.target>
