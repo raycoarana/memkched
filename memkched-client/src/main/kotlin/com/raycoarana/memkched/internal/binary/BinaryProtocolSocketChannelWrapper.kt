@@ -35,17 +35,17 @@ internal class BinaryProtocolSocketChannelWrapper(
         headerProcess: suspend (OpCode, Short, Byte, Int, Int, Long) -> T,
         errorProcess: suspend (BinaryProtocolError, String?) -> T
     ): T {
-        read(HEADER_SIZE)
-        inBuffer.flip()
-        val magicNumber: Byte = inBuffer.get()
-        val opCode: OpCode = OpCode.from(inBuffer.get())
-        val keyLength: Short = inBuffer.getShort()
-        val extrasLength: Byte = inBuffer.get()
-        val dataType: Byte = inBuffer.get()
-        val status: Status = Status.from(inBuffer.getShort())
-        val totalBodyLength: Int = inBuffer.getInt()
-        val opaque: Int = inBuffer.getInt()
-        val cas: Long = inBuffer.getLong()
+        val buffer = ByteBuffer.allocate(HEADER_SIZE)
+        readBinaryChunk(HEADER_SIZE, buffer.array())
+        val magicNumber: Byte = buffer.get()
+        val opCode: OpCode = OpCode.from(buffer.get())
+        val keyLength: Short = buffer.getShort()
+        val extrasLength: Byte = buffer.get()
+        val dataType: Byte = buffer.get()
+        val status: Status = Status.from(buffer.getShort())
+        val totalBodyLength: Int = buffer.getInt()
+        val opaque: Int = buffer.getInt()
+        val cas: Long = buffer.getLong()
 
         require(magicNumber == MAGIC_RESPONSE) { "Unexpected response magic number $magicNumber" }
         require(dataType == DATA_TYPE_RAW) { "Unexpected data type $dataType" }
@@ -92,9 +92,9 @@ internal class BinaryProtocolSocketChannelWrapper(
         return read
     }
 
-    private suspend inline fun read(byteToRead: Int? = null) =
+    private suspend inline fun read(byteToRead: Int) =
         suspendCoroutine { continuation ->
-            val limit = min(inBuffer.capacity(), byteToRead ?: Int.MAX_VALUE)
+            val limit = min(inBuffer.capacity(), byteToRead)
             inBuffer.clear().limit(limit)
             channel.read(inBuffer, readTimeout, MILLISECONDS, continuation, Handler)
         }
