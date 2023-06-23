@@ -42,10 +42,14 @@ class BinaryProtocolSocketChannelWrapperUnitTest {
     fun `read 64 bit long`() = runBlocking {
         channelWrapper.wrap(socketChannel)
 
-        givenReadWillReturn(listOf(ubyteArrayOf(
-            0x80u, 0x00u, 0x00u, 0x00u,
-            0x00u, 0x00u, 0x00u, 0x01u,
-        ).toByteArray()))
+        givenReadWillReturn(
+            listOf(
+                ubyteArrayOf(
+                    0x80u, 0x00u, 0x00u, 0x00u,
+                    0x00u, 0x00u, 0x00u, 0x01u,
+                ).toByteArray()
+            )
+        )
 
         val result: ULong = channelWrapper.readULong()
 
@@ -54,7 +58,11 @@ class BinaryProtocolSocketChannelWrapperUnitTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("readHeaderProvider")
-    fun `read package header successfully`(case: String, receivedBytesPackages: List<ByteArray>, expectedResult: HeaderReadResult) = runBlocking {
+    fun `read package header successfully`(
+        case: String,
+        receivedBytesPackages: List<ByteArray>,
+        expectedResult: HeaderReadResult
+    ) = runBlocking {
         channelWrapper.wrap(socketChannel)
 
         givenReadWillReturn(receivedBytesPackages)
@@ -71,25 +79,28 @@ class BinaryProtocolSocketChannelWrapperUnitTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("readIncompleteHeaderProvider")
-    fun `read incomplete or invalid package header`(case: String, receivedBytesPackages: List<ByteArray>, expectedException: Exception) =
-        runBlocking {
-            channelWrapper.wrap(socketChannel)
+    fun `read incomplete or invalid package header`(
+        case: String,
+        receivedBytesPackages: List<ByteArray>,
+        expectedException: Exception
+    ) = runBlocking {
+        channelWrapper.wrap(socketChannel)
 
-            givenReadWillReturn(receivedBytesPackages)
+        givenReadWillReturn(receivedBytesPackages)
 
-            val exception = Assertions.assertThrows(expectedException.javaClass) {
-                runBlocking {
-                    channelWrapper.readHeader(
-                        headerProcess = { opCode, keyLength, extrasLength, totalBodyLength, opaque, cas ->
-                            SuccessHeader(opCode, keyLength, extrasLength, totalBodyLength, opaque, cas)
-                        },
-                        errorProcess = { error, key -> ErrorHeader(error, key) }
-                    )
-                }
+        val exception = Assertions.assertThrows(expectedException.javaClass) {
+            runBlocking {
+                channelWrapper.readHeader(
+                    headerProcess = { opCode, keyLength, extrasLength, totalBodyLength, opaque, cas ->
+                        SuccessHeader(opCode, keyLength, extrasLength, totalBodyLength, opaque, cas)
+                    },
+                    errorProcess = { error, key -> ErrorHeader(error, key) }
+                )
             }
-
-            assertEquals(expectedException.message, exception.message)
         }
+
+        assertEquals(expectedException.message, exception.message)
+    }
 
     private fun givenReadWillReturn(packages: List<ByteArray>) {
         var callCount = 0
@@ -177,6 +188,7 @@ class BinaryProtocolSocketChannelWrapperUnitTest {
 
     @OptIn(ExperimentalUnsignedTypes::class)
     companion object {
+        @Suppress("LongMethod", "ArgumentListWrapping")
         @JvmStatic
         fun readHeaderProvider(): List<Arguments> = listOf(
             Arguments.of(
@@ -264,6 +276,8 @@ class BinaryProtocolSocketChannelWrapperUnitTest {
                 ErrorHeader(BinaryProtocolError(ADD, Status.KEY_NOT_FOUND, ""), null)
             ),
         )
+
+        @Suppress("LongMethod", "ArgumentListWrapping")
         @JvmStatic
         fun readIncompleteHeaderProvider(): List<Arguments> = listOf(
             Arguments.of(
@@ -307,6 +321,7 @@ class BinaryProtocolSocketChannelWrapperUnitTest {
             ),
         )
 
+        @Suppress("LongMethod", "ArgumentListWrapping")
         @JvmStatic
         fun writePackageProvider(): List<Arguments> = listOf(
             Arguments.of(
@@ -340,9 +355,11 @@ class BinaryProtocolSocketChannelWrapperUnitTest {
             ),
             Arguments.of(
                 "Write package without body",
-                WriteRequest(ADD, MAGIC_REQUEST, 3, 0, 345, 88888L, "key", byteArrayOf(
-                    0x00, 0x01, 0x02, 0x03
-                )),
+                WriteRequest(
+                    ADD, MAGIC_REQUEST, 3, 0, 345, 88888L, "key", byteArrayOf(
+                        0x00, 0x01, 0x02, 0x03
+                    )
+                ),
                 listOf(
                     ubyteArrayOf(
                         0x80u, 0x02u, 0x00u, 0x03u,
@@ -358,11 +375,13 @@ class BinaryProtocolSocketChannelWrapperUnitTest {
             ),
             Arguments.of(
                 "Write package with all",
-                WriteRequest(ADD, MAGIC_REQUEST, 3, 0, 345, 88888L, "key", byteArrayOf(
-                    0x00, 0x01, 0x02, 0x03
-                ), byteArrayOf(
-                    0x33, 0x44
-                )),
+                WriteRequest(
+                    ADD, MAGIC_REQUEST, 3, 0, 345, 88888L, "key", byteArrayOf(
+                        0x00, 0x01, 0x02, 0x03
+                    ), byteArrayOf(
+                        0x33, 0x44
+                    )
+                ),
                 listOf(
                     ubyteArrayOf(
                         0x80u, 0x02u, 0x00u, 0x03u,
@@ -411,15 +430,15 @@ class BinaryProtocolSocketChannelWrapperUnitTest {
             if (other == null || other !is WriteRequest) {
                 return false
             }
-            return Objects.equals(opCode, other.opCode)
-                && Objects.equals(magicNumber, other.magicNumber)
-                && Objects.equals(dataType, other.dataType)
-                && Objects.equals(reserved, other.reserved)
-                && Objects.equals(opaque, other.opaque)
-                && Objects.equals(cas, other.cas)
-                && Objects.equals(key, other.key)
-                && Objects.equals(extras, other.extras)
-                && Objects.equals(body, other.body)
+            return Objects.equals(opCode, other.opCode) &&
+                Objects.equals(magicNumber, other.magicNumber) &&
+                Objects.equals(dataType, other.dataType) &&
+                Objects.equals(reserved, other.reserved) &&
+                Objects.equals(opaque, other.opaque) &&
+                Objects.equals(cas, other.cas) &&
+                Objects.equals(key, other.key) &&
+                Objects.equals(extras, other.extras) &&
+                Objects.equals(body, other.body)
         }
 
         override fun hashCode(): Int {
