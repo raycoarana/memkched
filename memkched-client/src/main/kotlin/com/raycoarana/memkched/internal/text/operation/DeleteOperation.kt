@@ -15,15 +15,15 @@ internal class DeleteOperation(
     private val key: String,
     private val reply: Reply
 ) : Operation<TextProtocolSocketChannelWrapper, DeleteResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): DeleteResult {
+    override suspend fun run(socket: TextProtocolSocketChannelWrapper): DeleteResult {
         val cmd = "delete $key${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
+        socket.writeLine(cmd)
 
         if (reply == Reply.NO_REPLY) {
             return NoReply
         }
 
-        return when (val result = socketChannelWrapper.readLine()) {
+        return when (val result = socket.readLine()) {
             DELETED -> Deleted
             NOT_FOUND -> NotFound
             else -> throw MemcachedError.parse(result).asException()

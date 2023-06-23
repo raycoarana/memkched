@@ -1,6 +1,8 @@
 package com.raycoarana.memkched.internal.error
 
 import com.raycoarana.memkched.internal.MemcachedException
+import com.raycoarana.memkched.internal.binary.model.OpCode
+import com.raycoarana.memkched.internal.binary.model.Status
 import com.raycoarana.memkched.internal.text.CLIENT_ERROR
 import com.raycoarana.memkched.internal.text.ERROR
 import com.raycoarana.memkched.internal.text.SERVER_ERROR
@@ -16,6 +18,14 @@ sealed class MemcachedError {
     }
     data class ServerError(val reason: String) : MemcachedError() {
         override fun toString() = "$SERVER_ERROR $reason"
+    }
+
+    data class BinaryProtocolError(
+        val operation: OpCode,
+        val status: Status,
+        val errorMessage: String
+    ) : MemcachedError() {
+        override fun toString() = "${operation.opName} $status: $errorMessage"
     }
 
     companion object {

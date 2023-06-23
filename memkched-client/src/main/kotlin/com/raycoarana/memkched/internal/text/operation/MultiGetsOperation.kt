@@ -10,23 +10,23 @@ import com.raycoarana.memkched.internal.text.parsing.ValueLine
 internal open class MultiGetsOperation(
     private val keys: List<String>
 ) : Operation<TextProtocolSocketChannelWrapper, Map<String, GetsGatsResult<ByteArray>>>() {
-    override suspend fun run(
-        socketChannelWrapper: TextProtocolSocketChannelWrapper
+    internal override suspend fun run(
+        socket: TextProtocolSocketChannelWrapper
     ): Map<String, GetsGatsResult<ByteArray>> {
         if (keys.isEmpty()) {
             return emptyMap()
         }
 
         val cmd = keys.joinToString(separator = " ", prefix = buildCommandPrefix())
-        socketChannelWrapper.writeLine(cmd)
-        var endLineCandidate = socketChannelWrapper.readLine()
+        socket.writeLine(cmd)
+        var endLineCandidate = socket.readLine()
         val resultMap = HashMap<String, GetsGatsResult.Value<ByteArray>>()
         while (endLineCandidate != END) {
             val result = endLineCandidate
 
             val valueLine = ValueLine.parseValue(result)
-            val data = socketChannelWrapper.readBinary(valueLine.bytesCount)
-            endLineCandidate = socketChannelWrapper.readLine()
+            val data = socket.readBinary(valueLine.bytesCount)
+            endLineCandidate = socket.readLine()
             val casUnique = valueLine.casUnique ?: error("No CAS Unique found")
             resultMap[valueLine.key] = GetsGatsResult.Value(valueLine.flags, data, casUnique)
         }

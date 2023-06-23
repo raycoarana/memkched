@@ -20,7 +20,7 @@ class Flags {
      * Convert flags bit set into a UShort number ready for transmission in text protocol
      * @return UShort
      */
-    internal fun toUShort() = if (bitSet.isEmpty) 0 else bitSet.toLongArray()[0].toUShort()
+    internal fun toUShort(): UShort = if (bitSet.isEmpty) 0.toUShort() else bitSet.toLongArray()[0].toUShort()
 
     /**
      * Returns true if this {@code Flags} contains no bits that are set
