@@ -23,7 +23,7 @@
     <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
     <javac.target>17</javac.target>
     <kotlin.code.style>official</kotlin.code.style>
-    <detekt.version>1.22.0</detekt.version>
+    <detekt.version>1.23.1</detekt.version>
     <junit.version>5.9.3</junit.version>
   </properties>
 
