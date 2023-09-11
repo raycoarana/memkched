@@ -24,7 +24,7 @@
     <javac.target>17</javac.target>
     <kotlin.code.style>official</kotlin.code.style>
     <detekt.version>1.23.1</detekt.version>
-    <junit.version>5.9.3</junit.version>
+    <junit.version>5.10.0</junit.version>
   </properties>
 
   <dependencies>
