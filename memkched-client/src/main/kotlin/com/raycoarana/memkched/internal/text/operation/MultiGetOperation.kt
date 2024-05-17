@@ -11,22 +11,22 @@ internal open class MultiGetOperation(
     private val keys: List<String>
 ) : Operation<TextProtocolSocketChannelWrapper, Map<String, GetGatResult<ByteArray>>>() {
     override suspend fun run(
-        socketChannelWrapper: TextProtocolSocketChannelWrapper
+        socket: TextProtocolSocketChannelWrapper
     ): Map<String, GetGatResult<ByteArray>> {
         if (keys.isEmpty()) {
             return emptyMap()
         }
 
         val cmd = keys.joinToString(separator = " ", prefix = buildCommandPrefix())
-        socketChannelWrapper.writeLine(cmd)
-        var endLineCandidate = socketChannelWrapper.readLine()
+        socket.writeLine(cmd)
+        var endLineCandidate = socket.readLine()
         val resultMap = HashMap<String, GetGatResult.Value<ByteArray>>()
         while (endLineCandidate != END) {
             val result = endLineCandidate
 
             val valueLine = ValueLine.parseValue(result)
-            val data = socketChannelWrapper.readBinary(valueLine.bytesCount)
-            endLineCandidate = socketChannelWrapper.readLine()
+            val data = socket.readBinary(valueLine.bytesCount)
+            endLineCandidate = socket.readLine()
             resultMap[valueLine.key] = GetGatResult.Value(valueLine.flags, data)
         }
 

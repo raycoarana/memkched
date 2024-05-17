@@ -13,16 +13,16 @@ internal class PrependOperation(
     private val data: ByteArray,
     private val reply: Reply
 ) : Operation<TextProtocolSocketChannelWrapper, AppendPrependResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): AppendPrependResult {
+    override suspend fun run(socket: TextProtocolSocketChannelWrapper): AppendPrependResult {
         val cmd = "prepend $key 0 0 ${data.size}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+        socket.writeLine(cmd)
+        socket.writeBinary(data)
 
         if (reply == Reply.NO_REPLY) {
             return AppendPrependResult.NoReply
         }
 
-        return when (val result = socketChannelWrapper.readLine()) {
+        return when (val result = socket.readLine()) {
             STORED -> AppendPrependResult.Stored
             NOT_STORED -> AppendPrependResult.NotStored
             else -> throw MemcachedError.parse(result).asException()

@@ -17,15 +17,15 @@ internal class TouchOperation(
     private val expiration: Expiration,
     private val reply: Reply
 ) : Operation<TextProtocolSocketChannelWrapper, TouchResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): TouchResult {
+    override suspend fun run(socket: TextProtocolSocketChannelWrapper): TouchResult {
         val cmd = "touch $key ${expiration.value}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
+        socket.writeLine(cmd)
 
         if (reply == Reply.NO_REPLY) {
             return NoReply
         }
 
-        return when (val result = socketChannelWrapper.readLine()) {
+        return when (val result = socket.readLine()) {
             TOUCHED -> Touched
             NOT_FOUND -> NotFound
             else -> throw MemcachedError.parse(result).asException()

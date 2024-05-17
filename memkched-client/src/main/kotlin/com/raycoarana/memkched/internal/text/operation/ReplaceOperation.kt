@@ -17,16 +17,16 @@ internal class ReplaceOperation(
     private val data: ByteArray,
     private val reply: Reply
 ) : Operation<TextProtocolSocketChannelWrapper, AddReplaceResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): AddReplaceResult {
+    override suspend fun run(socket: TextProtocolSocketChannelWrapper): AddReplaceResult {
         val cmd = "replace $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+        socket.writeLine(cmd)
+        socket.writeBinary(data)
 
         if (reply == Reply.NO_REPLY) {
             return AddReplaceResult.NoReply
         }
 
-        return when (val result = socketChannelWrapper.readLine()) {
+        return when (val result = socket.readLine()) {
             STORED -> AddReplaceResult.Stored
             NOT_STORED -> AddReplaceResult.NotStored
             else -> throw MemcachedError.parse(result).asException()

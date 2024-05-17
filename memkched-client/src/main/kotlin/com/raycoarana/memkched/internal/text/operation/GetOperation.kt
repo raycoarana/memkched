@@ -9,14 +9,14 @@ import com.raycoarana.memkched.internal.text.parsing.ValueLine
 internal open class GetOperation(
     private val key: String
 ) : Operation<TextProtocolSocketChannelWrapper, GetGatResult<ByteArray>>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): GetGatResult<ByteArray> {
+    override suspend fun run(socket: TextProtocolSocketChannelWrapper): GetGatResult<ByteArray> {
         val cmd = buildCommand()
-        socketChannelWrapper.writeLine(cmd)
-        val result = socketChannelWrapper.readLine()
+        socket.writeLine(cmd)
+        val result = socket.readLine()
         if (result != END) {
             val valueLine = ValueLine.parseValue(result)
-            val data = socketChannelWrapper.readBinary(valueLine.bytesCount)
-            val endLine = socketChannelWrapper.readLine()
+            val data = socket.readBinary(valueLine.bytesCount)
+            val endLine = socket.readLine()
             assert(endLine == END) {
                 "Missing END"
             }

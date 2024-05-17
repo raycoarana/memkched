@@ -14,15 +14,15 @@ internal class DecrOperation(
     private val value: ULong,
     private val reply: Reply
 ) : Operation<TextProtocolSocketChannelWrapper, IncrDecrResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): IncrDecrResult {
+    override suspend fun run(socket: TextProtocolSocketChannelWrapper): IncrDecrResult {
         val cmd = "decr $key $value${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
+        socket.writeLine(cmd)
 
         if (reply == Reply.NO_REPLY) {
             return NoReply
         }
 
-        val result = socketChannelWrapper.readLine()
+        val result = socket.readLine()
         return when {
             result == NOT_FOUND -> NotFound
             result[0].isDigit() -> IncrDecrResult.Value(result.toULong())
