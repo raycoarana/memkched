@@ -18,8 +18,7 @@ internal interface ProtocolAbstractFactory<out T : SocketChannelWrapper> {
     ): Cluster<out T> = Cluster(
         nodeWorkerFactory = createNodeWorkerFactory(socketConfig),
         channel = Channel(queueSize),
-        addresses = addresses,
-        threadPoolInitialSize = socketConfig.nioThreadPoolInitialSize
+        addresses = addresses
     )
 
     companion object {

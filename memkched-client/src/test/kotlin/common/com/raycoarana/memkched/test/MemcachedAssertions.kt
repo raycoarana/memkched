@@ -8,16 +8,16 @@ import java.io.Closeable
 import java.lang.StringBuilder
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
-import java.nio.channels.AsynchronousSocketChannel
-import java.util.concurrent.TimeUnit
+import java.net.Socket
 
 class MemcachedAssertions(private val container: GenericContainer<*>) : Closeable {
-    private val channel = AsynchronousSocketChannel.open()
+    private val socket = Socket()
     private var connected: Boolean = false
 
     private fun init() {
         if (!connected) {
-            channel.connect(InetSocketAddress(container.host, container.getMappedPort(MEMCACHED_PORT))).get()
+            socket.connect(InetSocketAddress(container.host, container.getMappedPort(MEMCACHED_PORT)))
+            socket.soTimeout = 1000
             connected = true
         }
     }
@@ -28,7 +28,7 @@ class MemcachedAssertions(private val container: GenericContainer<*>) : Closeabl
     fun assertThatAfterSending(data: ByteArray): TextReceivedMatcher {
         init()
 
-        return TextReceivedMatcher(channel, data)
+        return TextReceivedMatcher(socket, data)
     }
 
     fun assertThatAfterSending(command: String, data: ByteArray): TextReceivedMatcher {
@@ -45,9 +45,9 @@ class MemcachedAssertions(private val container: GenericContainer<*>) : Closeabl
     }
 
     class TextReceivedMatcher(
-        channel: AsynchronousSocketChannel,
+        socket: Socket,
         private val data: ByteArray
-    ) : BaseReceivedMatcher(channel, data) {
+    ) : BaseReceivedMatcher(socket, data) {
 
         fun expectErrorLine() = expectLine("ERROR")
         fun expectClientErrorLine() = expectLine("CLIENT_ERROR")
@@ -80,7 +80,8 @@ class MemcachedAssertions(private val container: GenericContainer<*>) : Closeabl
         fun expectLine(line: String) = apply {
             if (buffer.position() == buffer.limit()) {
                 buffer.clear()
-                channel.read(buffer).get(1, TimeUnit.SECONDS)
+                val bytes = socket.getInputStream().read(buffer.array())
+                buffer.limit(bytes)
                 buffer.flip()
             }
             val lineBuilder = StringBuilder()
@@ -96,20 +97,20 @@ class MemcachedAssertions(private val container: GenericContainer<*>) : Closeabl
     }
 
     override fun close() {
-        channel.close()
+        socket.close()
         connected = false
     }
 
     @Suppress("UnnecessaryAbstractClass")
     abstract class BaseReceivedMatcher(
-        protected val channel: AsynchronousSocketChannel,
+        protected val socket: Socket,
         dataToSend: ByteArray
     ) {
         protected val buffer: ByteBuffer = ByteBuffer.allocate(4096)
 
         init {
-            buffer.put(dataToSend).flip()
-            channel.write(buffer).get()
+            socket.getOutputStream().write(dataToSend)
+            socket.getOutputStream().flush()
         }
     }
 }

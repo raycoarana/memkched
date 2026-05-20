@@ -1,5 +1,7 @@
-package com.raycoarana.memkched.internal
+package com.raycoarana.memkched.internal.text
 
+import com.raycoarana.memkched.internal.Operation
+import com.raycoarana.memkched.internal.Worker
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -8,47 +10,35 @@ import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
-import java.nio.channels.AsynchronousChannelGroup
-import java.nio.channels.AsynchronousSocketChannel
-import java.nio.channels.CompletionHandler
+import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal class NodeWorker<out T : SocketChannelWrapper>(
+internal class TextNodeWorker(
     private val address: InetSocketAddress,
-    socketChannelGroup: AsynchronousChannelGroup,
-    private val receiveChannel: ReceiveChannel<Operation<T, *>>,
-    private val socketChannelWrapper: T
-) {
+    private val receiveChannel: ReceiveChannel<Operation<TextProtocolSocketChannelWrapper, *>>,
+    private val socketChannelWrapper: TextProtocolSocketChannelWrapper
+) : Worker {
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val socketChannel: AsynchronousSocketChannel = AsynchronousSocketChannel.open(socketChannelGroup)
-
     private var ready = AtomicBoolean(false)
     private var processLoopJob: Job? = null
 
-    suspend fun start() {
-        socketChannelWrapper.wrap(socketChannel)
+    override suspend fun start() {
         logger.info("Connecting with node $address")
-        socketChannel.connect<Any>(
-            address,
-            this,
-            object : CompletionHandler<Void, Any> {
-                override fun completed(result: Void?, attachment: Any) {
-                    logger.info("Connected with node $address")
-                    // TODO Launch a proper scope
-                    processLoopJob = GlobalScope.launch(Dispatchers.IO) {
-                        ready.set(true)
-                        processLoop()
-                    }
-                }
-
-                override fun failed(ex: Throwable, attachment: Any) {
-                    ready.set(false)
-                    logger.error("Connection failure to node $address", ex)
-                }
+        val socket = withContext(Dispatchers.IO) {
+            Socket().apply {
+                tcpNoDelay = true
+                connect(address)
             }
-        )
+        }
+        socketChannelWrapper.wrap(socket)
+        logger.info("Connected with node $address")
+        processLoopJob = GlobalScope.launch(Dispatchers.IO) {
+            ready.set(true)
+            processLoop()
+        }
     }
 
     @Suppress("TooGenericExceptionCaught")
@@ -76,10 +66,10 @@ internal class NodeWorker<out T : SocketChannelWrapper>(
                 break
             }
         }
-        logger.info("Node worker $address proccess loop stopped.")
+        logger.info("Node worker $address process loop stopped.")
     }
 
-    suspend fun stop() {
+    override suspend fun stop() {
         logger.info("Node worker $address stop requested.")
         ready.set(false)
         processLoopJob?.cancelAndJoin()
