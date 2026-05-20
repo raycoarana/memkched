@@ -23,8 +23,7 @@ internal class CasOperation(
     override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): CasResult {
         val replyText = reply.asTextCommandValue()
         val cmd = "cas $key ${flags.toUShort()} ${expiration.value} ${data.size} ${casUnique.value}$replyText"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+        socketChannelWrapper.writeLineAndBinary(cmd, data)
 
         if (reply == Reply.NO_REPLY) {
             return CasResult.NoReply

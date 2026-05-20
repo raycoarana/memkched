@@ -33,6 +33,23 @@ internal class TextProtocolSocketChannelWrapper(
         write(byteArray)
     }
 
+    suspend fun writeLineAndBinary(line: String, byteArray: ByteArray) {
+        val lineByteArray = line.toByteArray(Charsets.US_ASCII)
+        val length = lineByteArray.size + EOL_BYTE_ARRAY.size + byteArray.size + EOL_BYTE_ARRAY.size
+        if (length > outBuffer.capacity()) {
+            writeLine(line)
+            writeBinary(byteArray)
+            return
+        }
+
+        outBuffer.clear()
+        outBuffer.put(lineByteArray)
+        outBuffer.put(EOL_BYTE_ARRAY)
+        outBuffer.put(byteArray)
+        outBuffer.put(EOL_BYTE_ARRAY)
+        writeChunk()
+    }
+
     suspend fun readBinary(size: Int): ByteArray {
         val result = ByteArray(size)
         readBinaryChunk(size, result)
@@ -97,7 +114,6 @@ internal class TextProtocolSocketChannelWrapper(
 
     private suspend inline fun write(byteArray: ByteArray) {
         var offset = 0
-        var eolSent = false
         while (offset < byteArray.size) {
             outBuffer.clear()
             val length = min(outBuffer.capacity(), byteArray.size - offset)
@@ -105,22 +121,25 @@ internal class TextProtocolSocketChannelWrapper(
             if (length + 2 <= outBuffer.capacity()) {
                 // include EOL
                 outBuffer.put(EOL_BYTE_ARRAY)
-                eolSent = true
+                offset += length
+                writeChunk()
+                return
             }
-            offset += writeChunk()
-        }
-        if (!eolSent) {
-            // smell that buffer is too short
-            outBuffer.clear().put(EOL_BYTE_ARRAY)
+            offset += length
             writeChunk()
         }
+        outBuffer.clear().put(EOL_BYTE_ARRAY)
+        writeChunk()
     }
 
-    private suspend inline fun writeChunk(): Int =
-        suspendCoroutine { continuation ->
-            outBuffer.flip()
-            channel.write(outBuffer, writeTimeout, MILLISECONDS, continuation, Handler)
+    private suspend inline fun writeChunk() {
+        outBuffer.flip()
+        while (outBuffer.hasRemaining()) {
+            suspendCoroutine<Int> { continuation ->
+                channel.write(outBuffer, writeTimeout, MILLISECONDS, continuation, Handler)
+            }
         }
+    }
 
     object Handler : CompletionHandler<Int, Continuation<Int>> {
         override fun completed(result: Int, attachment: Continuation<Int>) =

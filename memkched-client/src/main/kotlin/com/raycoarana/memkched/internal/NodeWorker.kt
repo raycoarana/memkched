@@ -1,9 +1,12 @@
 package com.raycoarana.memkched.internal
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
@@ -22,6 +25,7 @@ internal class NodeWorker<out T : SocketChannelWrapper>(
     private val socketChannel: AsynchronousSocketChannel = AsynchronousSocketChannel.open(socketChannelGroup)
 
     private var ready = AtomicBoolean(false)
+    private var processLoopJob: Job? = null
 
     suspend fun start() {
         socketChannelWrapper.wrap(socketChannel)
@@ -33,7 +37,7 @@ internal class NodeWorker<out T : SocketChannelWrapper>(
                 override fun completed(result: Void?, attachment: Any) {
                     logger.info("Connected with node $address")
                     // TODO Launch a proper scope
-                    GlobalScope.launch(Dispatchers.IO) {
+                    processLoopJob = GlobalScope.launch(Dispatchers.IO) {
                         ready.set(true)
                         processLoop()
                     }
@@ -55,9 +59,14 @@ internal class NodeWorker<out T : SocketChannelWrapper>(
                 val operation = receiveChannel.receive()
                 operation.execute(socketChannelWrapper)
             } catch (ex: ClosedReceiveChannelException) {
-                logger.error("Operation channel closed at received in node $address", ex)
+                logger.info("Operation channel closed at received in node $address", ex)
                 ready.set(false)
                 socketChannelWrapper.close()
+            } catch (ex: CancellationException) {
+                logger.info("Node worker $address process loop cancelled.", ex)
+                ready.set(false)
+                socketChannelWrapper.close()
+                throw ex
             } catch (ex: Exception) {
                 logger.error("Failure in socket with node $address", ex)
                 socketChannelWrapper.close()
@@ -70,8 +79,10 @@ internal class NodeWorker<out T : SocketChannelWrapper>(
         logger.info("Node worker $address proccess loop stopped.")
     }
 
-    fun stop() {
+    suspend fun stop() {
         logger.info("Node worker $address stop requested.")
         ready.set(false)
+        processLoopJob?.cancelAndJoin()
+        socketChannelWrapper.close()
     }
 }

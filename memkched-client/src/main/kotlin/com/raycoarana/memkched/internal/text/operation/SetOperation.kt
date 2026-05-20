@@ -18,8 +18,7 @@ internal class SetOperation(
 ) : Operation<TextProtocolSocketChannelWrapper, SetResult>() {
     override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): SetResult {
         val cmd = "set $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+        socketChannelWrapper.writeLineAndBinary(cmd, data)
 
         if (reply == Reply.NO_REPLY) {
             return SetResult.NoReply

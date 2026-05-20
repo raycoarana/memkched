@@ -15,8 +15,7 @@ internal class PrependOperation(
 ) : Operation<TextProtocolSocketChannelWrapper, AppendPrependResult>() {
     override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): AppendPrependResult {
         val cmd = "prepend $key 0 0 ${data.size}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+        socketChannelWrapper.writeLineAndBinary(cmd, data)
 
         if (reply == Reply.NO_REPLY) {
             return AppendPrependResult.NoReply

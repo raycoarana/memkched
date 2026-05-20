@@ -19,8 +19,7 @@ internal class AddOperation(
 ) : Operation<TextProtocolSocketChannelWrapper, AddReplaceResult>() {
     override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): AddReplaceResult {
         val cmd = "add $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+        socketChannelWrapper.writeLineAndBinary(cmd, data)
 
         if (reply == Reply.NO_REPLY) {
             return AddReplaceResult.NoReply

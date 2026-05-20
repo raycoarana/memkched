@@ -4,6 +4,7 @@ import kotlinx.coroutines.channels.Channel
 import java.net.InetSocketAddress
 import java.nio.channels.AsynchronousChannelGroup
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 internal class Cluster<T : SocketChannelWrapper>(
     private val nodeWorkerFactory: NodeWorkerFactory<T>,
@@ -20,6 +21,10 @@ internal class Cluster<T : SocketChannelWrapper>(
     }
 
     suspend fun stop() {
+        channel.close()
         workers.forEach { it.stop() }
+        group.shutdownNow()
+        executorService.shutdownNow()
+        executorService.awaitTermination(1, TimeUnit.SECONDS)
     }
 }

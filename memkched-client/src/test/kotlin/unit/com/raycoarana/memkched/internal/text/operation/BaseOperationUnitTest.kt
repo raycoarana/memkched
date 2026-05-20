@@ -14,16 +14,21 @@ internal open class BaseOperationUnitTest<T : Any> {
     private val socketChannel: TextProtocolSocketChannelWrapper = mockk()
     private lateinit var operation: Operation<TextProtocolSocketChannelWrapper, T>
     private lateinit var result: T
+    private var expectedLine: String? = null
 
     protected fun givenOperation(value: Operation<TextProtocolSocketChannelWrapper, T>) {
         operation = value
     }
 
     protected fun expectWrittenLine(line: String) {
+        expectedLine = line
         coEvery { socketChannel.writeLine(line) } just Runs
     }
 
     protected fun expectWrittenBinaryBlock(byteArray: ByteArray) {
+        expectedLine?.let { line ->
+            coEvery { socketChannel.writeLineAndBinary(line, byteArray) } just Runs
+        }
         coEvery { socketChannel.writeBinary(byteArray) } just Runs
     }
 
