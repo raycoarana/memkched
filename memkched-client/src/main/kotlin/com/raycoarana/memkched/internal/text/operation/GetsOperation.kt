@@ -8,10 +8,15 @@ import com.raycoarana.memkched.internal.text.parsing.ValueLine
 
 internal open class GetsOperation(
     private val key: String
-) : Operation<TextProtocolSocketChannelWrapper, GetsGatsResult<ByteArray>>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): GetsGatsResult<ByteArray> {
-        val cmd = buildCommand()
-        socketChannelWrapper.writeLine(cmd)
+) : Operation<TextProtocolSocketChannelWrapper, GetsGatsResult<ByteArray>>(),
+    TextOperation<GetsGatsResult<ByteArray>> {
+    override suspend fun writeRequest(socketChannelWrapper: TextProtocolSocketChannelWrapper) {
+        socketChannelWrapper.writeLine(buildCommand())
+    }
+
+    override suspend fun readResponse(
+        socketChannelWrapper: TextProtocolSocketChannelWrapper
+    ): GetsGatsResult<ByteArray> {
         val result = socketChannelWrapper.readLine()
         if (result != END) {
             val valueLine = ValueLine.parseValue(result)

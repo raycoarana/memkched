@@ -9,16 +9,20 @@ import com.raycoarana.memkched.internal.text.parsing.ValueLine
 
 internal open class MultiGetOperation(
     private val keys: List<String>
-) : Operation<TextProtocolSocketChannelWrapper, Map<String, GetGatResult<ByteArray>>>() {
-    override suspend fun run(
+) : Operation<TextProtocolSocketChannelWrapper, Map<String, GetGatResult<ByteArray>>>(),
+    TextOperation<Map<String, GetGatResult<ByteArray>>> {
+    override val readsResponse: Boolean
+        get() = keys.isNotEmpty()
+
+    override suspend fun writeRequest(socketChannelWrapper: TextProtocolSocketChannelWrapper) {
+        if (keys.isNotEmpty()) {
+            socketChannelWrapper.writeLine(keys.joinToString(separator = " ", prefix = buildCommandPrefix()))
+        }
+    }
+
+    override suspend fun readResponse(
         socketChannelWrapper: TextProtocolSocketChannelWrapper
     ): Map<String, GetGatResult<ByteArray>> {
-        if (keys.isEmpty()) {
-            return emptyMap()
-        }
-
-        val cmd = keys.joinToString(separator = " ", prefix = buildCommandPrefix())
-        socketChannelWrapper.writeLine(cmd)
         var endLineCandidate = socketChannelWrapper.readLine()
         val resultMap = HashMap<String, GetGatResult.Value<ByteArray>>()
         while (endLineCandidate != END) {
@@ -32,6 +36,8 @@ internal open class MultiGetOperation(
 
         return keys.associateBy({ key -> key }) { resultMap.getOrDefault(it, NotFound) }
     }
+
+    override fun noReplyResult(): Map<String, GetGatResult<ByteArray>> = emptyMap()
 
     protected open fun buildCommandPrefix() = "get "
 }

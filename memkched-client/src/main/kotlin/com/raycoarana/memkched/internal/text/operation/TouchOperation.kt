@@ -16,19 +16,22 @@ internal class TouchOperation(
     private val key: String,
     private val expiration: Expiration,
     private val reply: Reply
-) : Operation<TextProtocolSocketChannelWrapper, TouchResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): TouchResult {
-        val cmd = "touch $key ${expiration.value}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
+) : Operation<TextProtocolSocketChannelWrapper, TouchResult>(), TextOperation<TouchResult> {
+    override val readsResponse: Boolean
+        get() = reply != Reply.NO_REPLY
 
-        if (reply == Reply.NO_REPLY) {
-            return NoReply
-        }
+    override suspend fun writeRequest(socketChannelWrapper: TextProtocolSocketChannelWrapper) {
+        socketChannelWrapper.writeLine(command())
+    }
 
-        return when (val result = socketChannelWrapper.readLine()) {
+    override suspend fun readResponse(socketChannelWrapper: TextProtocolSocketChannelWrapper): TouchResult =
+        when (val result = socketChannelWrapper.readLine()) {
             TOUCHED -> Touched
             NOT_FOUND -> NotFound
             else -> throw MemcachedError.parse(result).asException()
         }
-    }
+
+    override fun noReplyResult() = NoReply
+
+    private fun command() = "touch $key ${expiration.value}${reply.asTextCommandValue()}"
 }

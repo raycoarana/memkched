@@ -3,6 +3,7 @@ package com.raycoarana.memkched.internal.text
 import com.raycoarana.memkched.internal.SocketChannelWrapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.BufferedOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.Socket
@@ -24,7 +25,7 @@ internal class TextProtocolSocketChannelWrapper(
         this.socket = socket
         socket.soTimeout = readTimeout.toInt()
         input = socket.getInputStream()
-        output = socket.getOutputStream()
+        output = BufferedOutputStream(socket.getOutputStream())
     }
 
     override fun reset() {
@@ -35,13 +36,11 @@ internal class TextProtocolSocketChannelWrapper(
     suspend fun writeBinary(byteArray: ByteArray) {
         output.write(byteArray)
         output.write(EOL_BYTE_ARRAY)
-        output.flush()
     }
 
     suspend fun writeLine(line: String) {
         output.write(line.toByteArray(Charsets.US_ASCII))
         output.write(EOL_BYTE_ARRAY)
-        output.flush()
     }
 
     suspend fun writeLineAndBinary(line: String, byteArray: ByteArray) {
@@ -49,6 +48,9 @@ internal class TextProtocolSocketChannelWrapper(
         output.write(EOL_BYTE_ARRAY)
         output.write(byteArray)
         output.write(EOL_BYTE_ARRAY)
+    }
+
+    suspend fun flush() {
         output.flush()
     }
 

@@ -1,5 +1,11 @@
 package com.raycoarana.memkched
 
+import com.raycoarana.memkched.api.HashAlgorithm
+import com.raycoarana.memkched.api.HashAlgorithm.NATIVE_HASH
+import com.raycoarana.memkched.api.HashAlgorithm.KETAMA_HASH
+import com.raycoarana.memkched.api.NodeLocatorType
+import com.raycoarana.memkched.api.NodeLocatorType.ARRAY_MOD
+import com.raycoarana.memkched.api.NodeLocatorType.CONSISTENT
 import com.raycoarana.memkched.api.Protocol
 import com.raycoarana.memkched.api.Protocol.TEXT
 import com.raycoarana.memkched.internal.OperationConfig
@@ -15,6 +21,8 @@ class MemkchedClientBuilder {
     private var readTimeout: Long = DEFAULT_SOCKET_READ_TIMEOUT_IN_MILLIS
     private var readBufferSize: Int = DEFAULT_READ_BUFFER_SIZE
     private var protocol: Protocol = TEXT
+    private var locatorType: NodeLocatorType = ARRAY_MOD
+    private var hashAlgorithm: HashAlgorithm = NATIVE_HASH
 
     fun node(address: InetSocketAddress) = apply {
         this.addresses = arrayOf(address)
@@ -47,6 +55,19 @@ class MemkchedClientBuilder {
         protocol = value
     }
 
+    fun locatorType(value: NodeLocatorType) = apply {
+        locatorType = value
+    }
+
+    fun hashAlgorithm(value: HashAlgorithm) = apply {
+        hashAlgorithm = value
+    }
+
+    fun ketama() = apply {
+        locatorType = CONSISTENT
+        hashAlgorithm = KETAMA_HASH
+    }
+
     fun operationQueueSize(value: Int) = apply {
         operationQueueSize = value
     }
@@ -63,7 +84,7 @@ class MemkchedClientBuilder {
             inBufferSize = readBufferSize,
             readTimeout = readTimeout
         )
-        val cluster = factory.createCluster(operationQueueSize, socketConfig, addresses)
+        val cluster = factory.createCluster(operationQueueSize, socketConfig, addresses, locatorType, hashAlgorithm)
         val operationConfig = OperationConfig(
             timeout = operationTimeout
         )

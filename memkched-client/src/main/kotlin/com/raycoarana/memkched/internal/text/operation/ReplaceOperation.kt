@@ -16,19 +16,22 @@ internal class ReplaceOperation(
     private val expiration: Expiration,
     private val data: ByteArray,
     private val reply: Reply
-) : Operation<TextProtocolSocketChannelWrapper, AddReplaceResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): AddReplaceResult {
-        val cmd = "replace $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLineAndBinary(cmd, data)
+) : Operation<TextProtocolSocketChannelWrapper, AddReplaceResult>(), TextOperation<AddReplaceResult> {
+    override val readsResponse: Boolean
+        get() = reply != Reply.NO_REPLY
 
-        if (reply == Reply.NO_REPLY) {
-            return AddReplaceResult.NoReply
-        }
+    override suspend fun writeRequest(socketChannelWrapper: TextProtocolSocketChannelWrapper) {
+        socketChannelWrapper.writeLineAndBinary(command(), data)
+    }
 
-        return when (val result = socketChannelWrapper.readLine()) {
+    override suspend fun readResponse(socketChannelWrapper: TextProtocolSocketChannelWrapper): AddReplaceResult =
+        when (val result = socketChannelWrapper.readLine()) {
             STORED -> AddReplaceResult.Stored
             NOT_STORED -> AddReplaceResult.NotStored
             else -> throw MemcachedError.parse(result).asException()
         }
-    }
+
+    override fun noReplyResult() = AddReplaceResult.NoReply
+
+    private fun command() = "replace $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
 }

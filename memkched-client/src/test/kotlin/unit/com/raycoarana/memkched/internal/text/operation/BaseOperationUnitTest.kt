@@ -12,12 +12,12 @@ import kotlin.test.assertEquals
 
 internal open class BaseOperationUnitTest<T : Any> {
     private val socketChannel: TextProtocolSocketChannelWrapper = mockk()
-    private lateinit var operation: Operation<TextProtocolSocketChannelWrapper, T>
+    private lateinit var operation: TextOperation<T>
     private lateinit var result: T
     private var expectedLine: String? = null
 
     protected fun givenOperation(value: Operation<TextProtocolSocketChannelWrapper, T>) {
-        operation = value
+        operation = value as TextOperation<T>
     }
 
     protected fun expectWrittenLine(line: String) {
@@ -42,8 +42,12 @@ internal open class BaseOperationUnitTest<T : Any> {
 
     protected fun whenRun() {
         result = runBlocking {
-            operation.execute(socketChannel)
-            operation.await(1000)
+            operation.writeRequest(socketChannel)
+            if (operation.readsResponse) {
+                operation.readResponse(socketChannel)
+            } else {
+                operation.noReplyResult()
+            }
         }
     }
 

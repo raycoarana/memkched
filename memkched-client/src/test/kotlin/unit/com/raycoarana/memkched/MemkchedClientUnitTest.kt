@@ -50,9 +50,7 @@ class MemkchedClientUnitTest {
     private val transcoder: Transcoder<String> = StringToBytesTranscoder
 
     private val createOperationFactory: OperationFactory<out SocketChannelWrapper> = mockk()
-    private val cluster: Cluster<out SocketChannelWrapper> = mockk<Cluster<out SocketChannelWrapper>>().also {
-        every { it.channel } returns channel
-    }
+    private val cluster: Cluster<out SocketChannelWrapper> = mockk<Cluster<out SocketChannelWrapper>>()
     private val operationConfig: OperationConfig = mockk()
 
     private val client = MemkchedClient(
@@ -354,7 +352,10 @@ class MemkchedClientUnitTest {
     }
 
     private fun givenOperationIsSentSuccessfully() {
-        coEvery { channel.send(operation) } just Runs
+        every { cluster.groupByNode(listOf(SOME_KEY)) } returns listOf(listOf(SOME_KEY))
+        every { cluster.channels } returns listOf(channel)
+        coEvery { cluster.send(SOME_KEY, operation) } just Runs
+        coEvery { cluster.sendAll(listOf(operation)) } just Runs
     }
 
     private fun givenAwaitForOperationResultReturns(expectedResult: Any) {
