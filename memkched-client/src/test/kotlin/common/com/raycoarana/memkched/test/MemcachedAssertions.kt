@@ -7,8 +7,8 @@ import org.testcontainers.containers.GenericContainer
 import java.io.Closeable
 import java.lang.StringBuilder
 import java.net.InetSocketAddress
-import java.nio.ByteBuffer
 import java.net.Socket
+import java.nio.ByteBuffer
 
 class MemcachedAssertions(private val container: GenericContainer<*>) : Closeable {
     private val socket = Socket()

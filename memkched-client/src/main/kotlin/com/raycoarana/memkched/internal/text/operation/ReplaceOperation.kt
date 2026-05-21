@@ -33,5 +33,6 @@ internal class ReplaceOperation(
 
     override fun noReplyResult() = AddReplaceResult.NoReply
 
-    private fun command() = "replace $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
+    private fun command() =
+        "replace $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
 }

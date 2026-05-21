@@ -1,8 +1,8 @@
 package com.raycoarana.memkched
 
 import com.raycoarana.memkched.api.HashAlgorithm
-import com.raycoarana.memkched.api.HashAlgorithm.NATIVE_HASH
 import com.raycoarana.memkched.api.HashAlgorithm.KETAMA_HASH
+import com.raycoarana.memkched.api.HashAlgorithm.NATIVE_HASH
 import com.raycoarana.memkched.api.NodeLocatorType
 import com.raycoarana.memkched.api.NodeLocatorType.ARRAY_MOD
 import com.raycoarana.memkched.api.NodeLocatorType.CONSISTENT

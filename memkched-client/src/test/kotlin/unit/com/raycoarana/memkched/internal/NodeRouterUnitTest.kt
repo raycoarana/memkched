@@ -51,7 +51,11 @@ class NodeRouterUnitTest {
     @Test
     @Suppress("UNCHECKED_CAST")
     fun `consistent locator normalizes sixty four bit hashes to the ring range`() {
-        val router = NodeRouter.create(NodeLocatorType.CONSISTENT, HashAlgorithm.FNV1_64_HASH, addresses) as ConsistentNodeRouter
+        val router = NodeRouter.create(
+            NodeLocatorType.CONSISTENT,
+            HashAlgorithm.FNV1_64_HASH,
+            addresses
+        ) as ConsistentNodeRouter
         val continuum = ConsistentNodeRouter::class.java.getDeclaredField("continuum")
             .apply { isAccessible = true }
             .get(router) as TreeMap<Long, Int>

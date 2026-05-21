@@ -32,6 +32,7 @@ class MemkchedClient internal constructor(
 ) {
     @Suppress("UNCHECKED_CAST")
     private val routedCluster: Cluster<SocketChannelWrapper> = cluster as Cluster<SocketChannelWrapper>
+
     @Suppress("UNCHECKED_CAST")
     private val operationFactory: OperationFactory<SocketChannelWrapper> =
         createOperationFactory as OperationFactory<SocketChannelWrapper>
@@ -437,5 +438,4 @@ class MemkchedClient internal constructor(
             }
         keys.associateWith { key -> merged.getValue(key) }
     }
-
 }

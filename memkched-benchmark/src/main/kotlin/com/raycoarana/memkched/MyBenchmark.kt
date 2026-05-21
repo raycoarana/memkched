@@ -18,16 +18,20 @@ import org.openjdk.jmh.annotations.Setup
 import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.annotations.TearDown
 import org.openjdk.jmh.annotations.Warmup
+import java.io.EOFException
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.locks.ReentrantLock
 import java.util.concurrent.TimeUnit
-import kotlin.math.min
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.math.min
+
+private const val DATA_SIZE_RESPONSE_PART = 3
 
 @BenchmarkMode(Throughput)
 @Warmup(iterations = 5)
@@ -280,7 +284,7 @@ class RawTextClient(
         }
 
         val parts = line.split(' ')
-        val data = readBinary(parts[3].toInt())
+        val data = readBinary(parts[DATA_SIZE_RESPONSE_PART].toInt())
         check(readLine() == END)
         return data
     }
@@ -393,6 +397,7 @@ class PipelinedRawTextClient(
     private lateinit var input: InputStream
     private lateinit var output: OutputStream
     private lateinit var worker: Thread
+
     @Volatile
     private var running = false
 
@@ -448,7 +453,7 @@ class PipelinedRawTextClient(
             }
         } catch (ex: InterruptedException) {
             Thread.currentThread().interrupt()
-        } catch (ex: Exception) {
+        } catch (ex: IOException) {
             failPending(ex)
         }
     }
@@ -482,12 +487,12 @@ class PipelinedRawTextClient(
         }
 
         val parts = line.split(' ')
-        val data = readBinary(parts[3].toInt())
+        val data = readBinary(parts[DATA_SIZE_RESPONSE_PART].toInt())
         check(readLine() == END)
         return data
     }
 
-    private fun failPending(ex: Exception) {
+    private fun failPending(ex: Throwable) {
         for (request in batch) {
             request.future.completeExceptionally(ex)
         }
@@ -507,7 +512,9 @@ class PipelinedRawTextClient(
         while (offset < size) {
             if (position == limit) {
                 val read = input.read(result, offset, size - offset)
-                check(read >= 0) { "Socket closed while reading binary payload" }
+                if (read < 0) {
+                    throw EOFException("Socket closed while reading binary payload")
+                }
                 offset += read
             } else {
                 val read = min(limit - position, size - offset)
@@ -550,7 +557,9 @@ class PipelinedRawTextClient(
 
     private fun refill() {
         val read = input.read(inBuffer)
-        check(read >= 0) { "Socket closed while reading" }
+        if (read < 0) {
+            throw EOFException("Socket closed while reading")
+        }
         position = 0
         limit = read
     }
