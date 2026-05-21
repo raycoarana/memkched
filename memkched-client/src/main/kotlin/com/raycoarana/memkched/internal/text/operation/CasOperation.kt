@@ -19,22 +19,26 @@ internal class CasOperation(
     private val data: ByteArray,
     private val casUnique: CasUnique,
     private val reply: Reply
-) : Operation<TextProtocolSocketChannelWrapper, CasResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): CasResult {
-        val replyText = reply.asTextCommandValue()
-        val cmd = "cas $key ${flags.toUShort()} ${expiration.value} ${data.size} ${casUnique.value}$replyText"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+) : Operation<TextProtocolSocketChannelWrapper, CasResult>(), TextOperation<CasResult> {
+    override val readsResponse: Boolean
+        get() = reply != Reply.NO_REPLY
 
-        if (reply == Reply.NO_REPLY) {
-            return CasResult.NoReply
-        }
+    override suspend fun writeRequest(socketChannelWrapper: TextProtocolSocketChannelWrapper) {
+        socketChannelWrapper.writeLineAndBinary(command(), data)
+    }
 
-        return when (val result = socketChannelWrapper.readLine()) {
+    override suspend fun readResponse(socketChannelWrapper: TextProtocolSocketChannelWrapper): CasResult =
+        when (val result = socketChannelWrapper.readLine()) {
             STORED -> CasResult.Stored
             EXISTS -> CasResult.Exists
             NOT_FOUND -> CasResult.NotFound
             else -> throw MemcachedError.parse(result).asException()
         }
+
+    override fun noReplyResult() = CasResult.NoReply
+
+    private fun command(): String {
+        val replyText = reply.asTextCommandValue()
+        return "cas $key ${flags.toUShort()} ${expiration.value} ${data.size} ${casUnique.value}$replyText"
     }
 }

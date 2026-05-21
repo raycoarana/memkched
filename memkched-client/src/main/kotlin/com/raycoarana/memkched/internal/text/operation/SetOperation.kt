@@ -15,21 +15,23 @@ internal class SetOperation(
     private val expiration: Expiration,
     private val data: ByteArray,
     private val reply: Reply
-) : Operation<TextProtocolSocketChannelWrapper, SetResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): SetResult {
-        val cmd = "set $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+) : Operation<TextProtocolSocketChannelWrapper, SetResult>(), TextOperation<SetResult> {
+    override val readsResponse: Boolean
+        get() = reply != Reply.NO_REPLY
 
-        if (reply == Reply.NO_REPLY) {
-            return SetResult.NoReply
-        }
+    override suspend fun writeRequest(socketChannelWrapper: TextProtocolSocketChannelWrapper) {
+        socketChannelWrapper.writeLineAndBinary(command(), data)
+    }
 
+    override suspend fun readResponse(socketChannelWrapper: TextProtocolSocketChannelWrapper): SetResult {
         val result = socketChannelWrapper.readLine()
-        return if (result == STORED) {
-            SetResult.Stored
-        } else {
-            throw MemcachedError.parse(result).asException()
-        }
+        return if (result == STORED) SetResult.Stored else throw MemcachedError.parse(result).asException()
+    }
+
+    override fun noReplyResult() = SetResult.NoReply
+
+    private fun command(): String {
+        val cmd = "set $key ${flags.toUShort()} ${expiration.value} ${data.size}${reply.asTextCommandValue()}"
+        return cmd
     }
 }

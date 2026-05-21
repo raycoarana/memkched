@@ -12,20 +12,22 @@ internal class AppendOperation(
     private val key: String,
     private val data: ByteArray,
     private val reply: Reply
-) : Operation<TextProtocolSocketChannelWrapper, AppendPrependResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): AppendPrependResult {
-        val cmd = "append $key 0 0 ${data.size}${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
-        socketChannelWrapper.writeBinary(data)
+) : Operation<TextProtocolSocketChannelWrapper, AppendPrependResult>(), TextOperation<AppendPrependResult> {
+    override val readsResponse: Boolean
+        get() = reply != Reply.NO_REPLY
 
-        if (reply == Reply.NO_REPLY) {
-            return AppendPrependResult.NoReply
-        }
+    override suspend fun writeRequest(socketChannelWrapper: TextProtocolSocketChannelWrapper) {
+        socketChannelWrapper.writeLineAndBinary(command(), data)
+    }
 
-        return when (val result = socketChannelWrapper.readLine()) {
+    override suspend fun readResponse(socketChannelWrapper: TextProtocolSocketChannelWrapper): AppendPrependResult =
+        when (val result = socketChannelWrapper.readLine()) {
             STORED -> AppendPrependResult.Stored
             NOT_STORED -> AppendPrependResult.NotStored
             else -> throw MemcachedError.parse(result).asException()
         }
-    }
+
+    override fun noReplyResult() = AppendPrependResult.NoReply
+
+    private fun command() = "append $key 0 0 ${data.size}${reply.asTextCommandValue()}"
 }

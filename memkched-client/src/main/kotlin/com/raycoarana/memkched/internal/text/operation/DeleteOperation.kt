@@ -14,19 +14,22 @@ import com.raycoarana.memkched.internal.text.TextProtocolSocketChannelWrapper
 internal class DeleteOperation(
     private val key: String,
     private val reply: Reply
-) : Operation<TextProtocolSocketChannelWrapper, DeleteResult>() {
-    override suspend fun run(socketChannelWrapper: TextProtocolSocketChannelWrapper): DeleteResult {
-        val cmd = "delete $key${reply.asTextCommandValue()}"
-        socketChannelWrapper.writeLine(cmd)
+) : Operation<TextProtocolSocketChannelWrapper, DeleteResult>(), TextOperation<DeleteResult> {
+    override val readsResponse: Boolean
+        get() = reply != Reply.NO_REPLY
 
-        if (reply == Reply.NO_REPLY) {
-            return NoReply
-        }
+    override suspend fun writeRequest(socketChannelWrapper: TextProtocolSocketChannelWrapper) {
+        socketChannelWrapper.writeLine(command())
+    }
 
-        return when (val result = socketChannelWrapper.readLine()) {
+    override suspend fun readResponse(socketChannelWrapper: TextProtocolSocketChannelWrapper): DeleteResult =
+        when (val result = socketChannelWrapper.readLine()) {
             DELETED -> Deleted
             NOT_FOUND -> NotFound
             else -> throw MemcachedError.parse(result).asException()
         }
-    }
+
+    override fun noReplyResult() = NoReply
+
+    private fun command() = "delete $key${reply.asTextCommandValue()}"
 }

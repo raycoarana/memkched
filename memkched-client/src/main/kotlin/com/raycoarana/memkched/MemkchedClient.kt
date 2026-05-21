@@ -7,6 +7,7 @@ import com.raycoarana.memkched.api.Flags
 import com.raycoarana.memkched.api.Reply
 import com.raycoarana.memkched.api.Transcoder
 import com.raycoarana.memkched.internal.Cluster
+import com.raycoarana.memkched.internal.Operation
 import com.raycoarana.memkched.internal.OperationConfig
 import com.raycoarana.memkched.internal.OperationFactory
 import com.raycoarana.memkched.internal.SocketChannelWrapper
@@ -20,15 +21,21 @@ import com.raycoarana.memkched.internal.result.GetsGatsResult
 import com.raycoarana.memkched.internal.result.IncrDecrResult
 import com.raycoarana.memkched.internal.result.SetResult
 import com.raycoarana.memkched.internal.result.TouchResult
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 class MemkchedClient internal constructor(
-    private val createOperationFactory: OperationFactory<out SocketChannelWrapper>,
+    createOperationFactory: OperationFactory<out SocketChannelWrapper>,
     private val cluster: Cluster<out SocketChannelWrapper>,
     private val operationConfig: OperationConfig
 ) {
     @Suppress("UNCHECKED_CAST")
-    private val channel: Channel<Any> = cluster.channel as Channel<Any>
+    private val routedCluster: Cluster<SocketChannelWrapper> = cluster as Cluster<SocketChannelWrapper>
+
+    @Suppress("UNCHECKED_CAST")
+    private val operationFactory: OperationFactory<SocketChannelWrapper> =
+        createOperationFactory as OperationFactory<SocketChannelWrapper>
 
     suspend fun initialize() {
         cluster.start()
@@ -50,8 +57,8 @@ class MemkchedClient internal constructor(
      * @return GetGatResult child class with the Value or NotFound
      */
     suspend fun <T> get(key: String, transcoder: Transcoder<T>): GetGatResult<T> {
-        val operation = createOperationFactory.get(key)
-        channel.send(operation)
+        val operation = operationFactory.get(key)
+        routedCluster.send(key, operation)
 
         val getResult = operation.await(operationConfig.timeout)
         return getResult.map { flags, data -> transcoder.decode(flags, data) }
@@ -67,10 +74,7 @@ class MemkchedClient internal constructor(
      * @return a Map of GetGatResult child classes with the Value or NotFound, indexed by its key
      */
     suspend fun <T> get(keys: List<String>, transcoder: Transcoder<T>): Map<String, GetGatResult<T>> {
-        val operation = createOperationFactory.get(keys)
-        channel.send(operation)
-
-        val getResultMap = operation.await(operationConfig.timeout)
+        val getResultMap = executeMultiKey(keys) { operationFactory.get(it) }
         return getResultMap.mapValues { it.value.map { flags, data -> transcoder.decode(flags, data) } }
     }
 
@@ -83,8 +87,8 @@ class MemkchedClient internal constructor(
      * @return GetsGatsResult child class with the Value or NotFound
      */
     suspend fun <T> gets(key: String, transcoder: Transcoder<T>): GetsGatsResult<T> {
-        val operation = createOperationFactory.gets(key)
-        channel.send(operation)
+        val operation = operationFactory.gets(key)
+        routedCluster.send(key, operation)
 
         val getsResult = operation.await(operationConfig.timeout)
         return getsResult.map { flags, data -> transcoder.decode(flags, data) }
@@ -100,10 +104,7 @@ class MemkchedClient internal constructor(
      * @return a Map of GetsGatsResult child classes with the Value or NotFound, indexed by its key
      */
     suspend fun <T> gets(keys: List<String>, transcoder: Transcoder<T>): Map<String, GetsGatsResult<T>> {
-        val operation = createOperationFactory.gets(keys)
-        channel.send(operation)
-
-        val getsResultMap = operation.await(operationConfig.timeout)
+        val getsResultMap = executeMultiKey(keys) { operationFactory.gets(it) }
         return getsResultMap.mapValues { it.value.map { flags, data -> transcoder.decode(flags, data) } }
     }
 
@@ -117,8 +118,8 @@ class MemkchedClient internal constructor(
      * @return GetGatResult child class with the Value or NotFound
      */
     suspend fun <T> gat(key: String, expiration: Expiration, transcoder: Transcoder<T>): GetGatResult<T> {
-        val operation = createOperationFactory.gat(key, expiration)
-        channel.send(operation)
+        val operation = operationFactory.gat(key, expiration)
+        routedCluster.send(key, operation)
 
         val gatResult = operation.await(operationConfig.timeout)
         return gatResult.map { flags, data -> transcoder.decode(flags, data) }
@@ -139,10 +140,7 @@ class MemkchedClient internal constructor(
         expiration: Expiration,
         transcoder: Transcoder<T>
     ): Map<String, GetGatResult<T>> {
-        val operation = createOperationFactory.gat(keys, expiration)
-        channel.send(operation)
-
-        val gatResultMap = operation.await(operationConfig.timeout)
+        val gatResultMap = executeMultiKey(keys) { operationFactory.gat(it, expiration) }
         return gatResultMap.mapValues { it.value.map { flags, data -> transcoder.decode(flags, data) } }
     }
 
@@ -156,8 +154,8 @@ class MemkchedClient internal constructor(
      * @return GetsGatsResult child class with the Value or NotFound
      */
     suspend fun <T> gats(key: String, expiration: Expiration, transcoder: Transcoder<T>): GetsGatsResult<T> {
-        val operation = createOperationFactory.gats(key, expiration)
-        channel.send(operation)
+        val operation = operationFactory.gats(key, expiration)
+        routedCluster.send(key, operation)
 
         val gatsResult = operation.await(operationConfig.timeout)
         return gatsResult.map { flags, data -> transcoder.decode(flags, data) }
@@ -178,10 +176,7 @@ class MemkchedClient internal constructor(
         expiration: Expiration,
         transcoder: Transcoder<T>
     ): Map<String, GetsGatsResult<T>> {
-        val operation = createOperationFactory.gats(keys, expiration)
-        channel.send(operation)
-
-        val gatsResultMap = operation.await(operationConfig.timeout)
+        val gatsResultMap = executeMultiKey(keys) { operationFactory.gats(it, expiration) }
         return gatsResultMap.mapValues { it.value.map { flags, data -> transcoder.decode(flags, data) } }
     }
 
@@ -206,8 +201,8 @@ class MemkchedClient internal constructor(
         reply: Reply = Reply.DEFAULT
     ): SetResult {
         val data = transcoder.encode(value)
-        val operation = createOperationFactory.set(key, flags, expiration, data, reply)
-        channel.send(operation)
+        val operation = operationFactory.set(key, flags, expiration, data, reply)
+        routedCluster.send(key, operation)
 
         return operation.await(operationConfig.timeout)
     }
@@ -233,8 +228,8 @@ class MemkchedClient internal constructor(
         reply: Reply = Reply.DEFAULT
     ): AddReplaceResult {
         val data = transcoder.encode(value)
-        val operation = createOperationFactory.add(key, flags, expiration, data, reply)
-        channel.send(operation)
+        val operation = operationFactory.add(key, flags, expiration, data, reply)
+        routedCluster.send(key, operation)
 
         return operation.await(operationConfig.timeout)
     }
@@ -260,8 +255,8 @@ class MemkchedClient internal constructor(
         reply: Reply = Reply.DEFAULT
     ): AddReplaceResult {
         val data = transcoder.encode(value)
-        val operation = createOperationFactory.replace(key, flags, expiration, data, reply)
-        channel.send(operation)
+        val operation = operationFactory.replace(key, flags, expiration, data, reply)
+        routedCluster.send(key, operation)
 
         return operation.await(operationConfig.timeout)
     }
@@ -283,8 +278,8 @@ class MemkchedClient internal constructor(
         reply: Reply = Reply.DEFAULT
     ): AppendPrependResult {
         val data = transcoder.encode(value)
-        val operation = createOperationFactory.append(key, data, reply)
-        channel.send(operation)
+        val operation = operationFactory.append(key, data, reply)
+        routedCluster.send(key, operation)
 
         return operation.await(operationConfig.timeout)
     }
@@ -306,8 +301,8 @@ class MemkchedClient internal constructor(
         reply: Reply = Reply.DEFAULT
     ): AppendPrependResult {
         val data = transcoder.encode(value)
-        val operation = createOperationFactory.prepend(key, data, reply)
-        channel.send(operation)
+        val operation = operationFactory.prepend(key, data, reply)
+        routedCluster.send(key, operation)
 
         return operation.await(operationConfig.timeout)
     }
@@ -335,8 +330,8 @@ class MemkchedClient internal constructor(
         reply: Reply = Reply.DEFAULT
     ): CasResult {
         val data = transcoder.encode(value)
-        val operation = createOperationFactory.cas(key, flags, expiration, data, casUnique, reply)
-        channel.send(operation)
+        val operation = operationFactory.cas(key, flags, expiration, data, casUnique, reply)
+        routedCluster.send(key, operation)
 
         return operation.await(operationConfig.timeout)
     }
@@ -351,8 +346,8 @@ class MemkchedClient internal constructor(
      * NoReply were requested
      */
     suspend fun touch(key: String, expiration: Expiration, reply: Reply = Reply.DEFAULT): TouchResult {
-        val operation = createOperationFactory.touch(key, expiration, reply)
-        channel.send(operation)
+        val operation = operationFactory.touch(key, expiration, reply)
+        routedCluster.send(key, operation)
 
         return operation.await(operationConfig.timeout)
     }
@@ -367,8 +362,8 @@ class MemkchedClient internal constructor(
      * NoReply in case NoReply were requested
      */
     suspend fun incr(key: String, value: ULong = 1L.toULong(), reply: Reply = Reply.DEFAULT): IncrDecrResult {
-        val operation = createOperationFactory.incr(key, value, reply)
-        channel.send(operation)
+        val operation = operationFactory.incr(key, value, reply)
+        routedCluster.send(key, operation)
 
         return operation.await(operationConfig.timeout)
     }
@@ -383,8 +378,8 @@ class MemkchedClient internal constructor(
      * NoReply in case NoReply were requested
      */
     suspend fun decr(key: String, value: ULong = 1L.toULong(), reply: Reply = Reply.DEFAULT): IncrDecrResult {
-        val operation = createOperationFactory.decr(key, value, reply)
-        channel.send(operation)
+        val operation = operationFactory.decr(key, value, reply)
+        routedCluster.send(key, operation)
 
         return operation.await(operationConfig.timeout)
     }
@@ -398,8 +393,8 @@ class MemkchedClient internal constructor(
      * NoReply in case NoReply were requested
      */
     suspend fun delete(key: String, reply: Reply = Reply.DEFAULT): DeleteResult {
-        val operation = createOperationFactory.delete(key, reply)
-        channel.send(operation)
+        val operation = operationFactory.delete(key, reply)
+        routedCluster.send(key, operation)
 
         return operation.await(operationConfig.timeout)
     }
@@ -413,11 +408,34 @@ class MemkchedClient internal constructor(
      * requested
      */
     suspend fun flushAll(after: Relative? = null, reply: Reply = Reply.DEFAULT): FlushAllResult {
-        val operation = createOperationFactory.flushAll(after, reply)
+        val operations = routedCluster.channels.map { operationFactory.flushAll(after, reply) }
+        routedCluster.sendAll(operations)
+        return operations.map { it.await(operationConfig.timeout) }.reduce { acc, result ->
+            if (acc == FlushAllResult.Ok && result == FlushAllResult.Ok) FlushAllResult.Ok else result
+        }
+    }
 
-        // FIXME #7 flushAll must indicate what worker node to flush
-        channel.send(operation)
+    private suspend fun <R> executeMultiKey(
+        keys: List<String>,
+        createOperation: (List<String>) -> Operation<SocketChannelWrapper, Map<String, R>>
+    ): Map<String, R> = coroutineScope {
+        if (keys.isEmpty()) {
+            return@coroutineScope emptyMap()
+        }
 
-        return operation.await(operationConfig.timeout)
+        val merged = routedCluster.groupByNode(keys)
+            .filter { it.isNotEmpty() }
+            .map { nodeKeys ->
+                async {
+                    val operation = createOperation(nodeKeys)
+                    routedCluster.send(nodeKeys.first(), operation)
+                    operation.await(operationConfig.timeout)
+                }
+            }
+            .awaitAll()
+            .fold(LinkedHashMap<String, R>()) { acc, result ->
+                acc.apply { putAll(result) }
+            }
+        keys.associateWith { key -> merged.getValue(key) }
     }
 }

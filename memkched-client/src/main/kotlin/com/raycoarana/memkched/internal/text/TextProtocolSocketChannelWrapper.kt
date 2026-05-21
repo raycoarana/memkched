@@ -1,85 +1,88 @@
 package com.raycoarana.memkched.internal.text
 
 import com.raycoarana.memkched.internal.SocketChannelWrapper
-import java.nio.ByteBuffer
-import java.nio.channels.CompletionHandler
-import java.util.concurrent.TimeUnit.MILLISECONDS
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.BufferedOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.net.Socket
 import kotlin.math.min
 
 internal class TextProtocolSocketChannelWrapper(
     inBufferSize: Int,
-    outBufferSize: Int,
-    private val readTimeout: Long,
-    private val writeTimeout: Long
+    private val readTimeout: Long
 ) : SocketChannelWrapper() {
-    private val inBuffer = ByteBuffer.allocateDirect(inBufferSize)
-    private val outBuffer = ByteBuffer.allocateDirect(outBufferSize)
+    private val inBuffer = ByteArray(inBufferSize)
+    private var position = 0
+    private var limit = 0
+    private lateinit var socket: Socket
+    private lateinit var input: InputStream
+    private lateinit var output: OutputStream
 
-    override fun reset() {
-        inBuffer.clear()
-        inBuffer.limit(0)
-        outBuffer.clear()
+    fun wrap(socket: Socket) {
+        reset()
+        this.socket = socket
+        socket.soTimeout = readTimeout.toInt()
+        input = socket.getInputStream()
+        output = BufferedOutputStream(socket.getOutputStream())
     }
 
-    suspend fun writeBinary(byteArray: ByteArray): Unit =
-        write(byteArray)
+    override fun reset() {
+        position = 0
+        limit = 0
+    }
+
+    suspend fun writeBinary(byteArray: ByteArray) {
+        output.write(byteArray)
+        output.write(EOL_BYTE_ARRAY)
+    }
 
     suspend fun writeLine(line: String) {
-        val byteArray = line.toByteArray(Charsets.US_ASCII)
-        write(byteArray)
+        output.write(line.toByteArray(Charsets.US_ASCII))
+        output.write(EOL_BYTE_ARRAY)
+    }
+
+    suspend fun writeLineAndBinary(line: String, byteArray: ByteArray) {
+        output.write(line.toByteArray(Charsets.US_ASCII))
+        output.write(EOL_BYTE_ARRAY)
+        output.write(byteArray)
+        output.write(EOL_BYTE_ARRAY)
+    }
+
+    suspend fun flush() {
+        output.flush()
     }
 
     suspend fun readBinary(size: Int): ByteArray {
         val result = ByteArray(size)
-        readBinaryChunk(size, result)
+        var offset = 0
+        while (offset < size) {
+            if (position == limit) {
+                val read = input.read(result, offset, size - offset)
+                if (read < 0) {
+                    error("Socket closed while reading binary payload")
+                }
+                offset += read
+            } else {
+                val read = min(limit - position, size - offset)
+                inBuffer.copyInto(result, offset, position, position + read)
+                position += read
+                offset += read
+            }
+        }
         readEOL()
         return result
-    }
-
-    private suspend inline fun readBinaryChunk(
-        size: Int,
-        result: ByteArray
-    ): Int {
-        var offset = 0
-        var read = 0
-        while (offset < size) {
-            if (inBuffer.position() == inBuffer.limit()) {
-                read = read(size - offset)
-                inBuffer.flip()
-            } else {
-                read = min(inBuffer.limit() - inBuffer.position(), size - offset)
-            }
-            inBuffer.get(result, offset, read)
-            offset += read
-        }
-        return read
-    }
-
-    private suspend inline fun readEOL() {
-        var read = min(inBuffer.limit() - inBuffer.position(), 2)
-        while (read < 2) {
-            read += read(2 - read)
-        }
-        val eof1 = inBuffer.get().toInt().toChar()
-        val eof2 = inBuffer.get().toInt().toChar()
-        if (eof1 != '\r' || eof2 != '\n') {
-            error("Protocol error: EOL not found!")
-        }
     }
 
     suspend fun readLine(): String {
         val lineBuilder = StringBuilder()
         do {
-            if (inBuffer.position() == inBuffer.limit()) {
-                read()
-                inBuffer.flip()
+            if (position == limit) {
+                refill()
             }
-            while (inBuffer.position() < inBuffer.limit()) {
-                val current = inBuffer.get().toInt().toChar()
+            while (position < limit) {
+                val current = inBuffer[position++].toInt().toChar()
                 if (lineBuilder.length > 1 && lineBuilder.last() == '\r' && current == '\n') {
                     return lineBuilder.substring(0, lineBuilder.length - 1)
                 }
@@ -88,45 +91,35 @@ internal class TextProtocolSocketChannelWrapper(
         } while (true)
     }
 
-    private suspend inline fun read(byteToRead: Int? = null) =
-        suspendCoroutine { continuation ->
-            val limit = min(inBuffer.capacity(), byteToRead ?: Int.MAX_VALUE)
-            inBuffer.clear().limit(limit)
-            channel.read(inBuffer, readTimeout, MILLISECONDS, continuation, Handler)
-        }
-
-    private suspend inline fun write(byteArray: ByteArray) {
-        var offset = 0
-        var eolSent = false
-        while (offset < byteArray.size) {
-            outBuffer.clear()
-            val length = min(outBuffer.capacity(), byteArray.size - offset)
-            outBuffer.put(byteArray, offset, length)
-            if (length + 2 <= outBuffer.capacity()) {
-                // include EOL
-                outBuffer.put(EOL_BYTE_ARRAY)
-                eolSent = true
-            }
-            offset += writeChunk()
-        }
-        if (!eolSent) {
-            // smell that buffer is too short
-            outBuffer.clear().put(EOL_BYTE_ARRAY)
-            writeChunk()
+    private fun readEOL() {
+        val eof1 = readByte().toInt().toChar()
+        val eof2 = readByte().toInt().toChar()
+        if (eof1 != '\r' || eof2 != '\n') {
+            error("Protocol error: EOL not found!")
         }
     }
 
-    private suspend inline fun writeChunk(): Int =
-        suspendCoroutine { continuation ->
-            outBuffer.flip()
-            channel.write(outBuffer, writeTimeout, MILLISECONDS, continuation, Handler)
+    private fun readByte(): Byte {
+        if (position == limit) {
+            refill()
         }
+        return inBuffer[position++]
+    }
 
-    object Handler : CompletionHandler<Int, Continuation<Int>> {
-        override fun completed(result: Int, attachment: Continuation<Int>) =
-            attachment.resume(result)
+    private fun refill() {
+        val read = input.read(inBuffer)
+        if (read < 0) {
+            error("Socket closed while reading")
+        }
+        position = 0
+        limit = read
+    }
 
-        override fun failed(ex: Throwable, attachment: Continuation<Int>) =
-            attachment.resumeWithException(ex)
+    override suspend fun close() {
+        withContext(Dispatchers.IO) {
+            if (::socket.isInitialized) {
+                socket.close()
+            }
+        }
     }
 }
